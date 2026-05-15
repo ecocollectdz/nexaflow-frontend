@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaFlow — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0e;--s1:#111318;--s2:#161a22;--s3:#1c2130;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);
+  --blue:#3b7eff;--blue-dim:rgba(59,126,255,.12);
+  --green:#22c55e;--green-dim:rgba(34,197,94,.12);
+  --red:#f43f5e;--red-dim:rgba(244,63,94,.12);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,.12);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,.12);
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#475569;
+  --r:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;min-height:100vh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* LOGIN */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:var(--s1);border:1px solid var(--border2);border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.login-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:32px}
+.lmark{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),#22d3ee);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;color:#fff}
+.lname{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px}
+.login-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:22px;text-align:center;margin-bottom:6px}
+.login-sub{text-align:center;color:var(--t2);font-size:13px;margin-bottom:24px}
+.form-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.form-field label{font-size:12px;font-weight:600;color:var(--t2)}
+.form-field input{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--t1);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s}
+.form-field input:focus{border-color:var(--blue)}
+.login-btn{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s}
+.login-btn:hover{filter:brightness(1.1)}
+.login-err{color:var(--red);font-size:12px;text-align:center;margin-top:10px;display:none}
+
+/* MAIN LAYOUT */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh}
+.sidebar-logo{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.smark{width:30px;height:30px;background:linear-gradient(135deg,var(--blue),#22d3ee);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff}
+.sname{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px}
+.sbadge{font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:700}
+.snav{flex:1;padding:10px 8px;overflow-y:auto}
+.snav-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);padding:12px 8px 5px;font-weight:600}
+.sni{display:flex;align-items:center;gap:9px;padding:8px 10px;cursor:pointer;border-radius:7px;color:var(--t2);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px}
+.sni:hover{background:var(--s2);color:var(--t1)}
+.sni.active{background:var(--blue-dim);color:var(--blue)}
+.sni svg{width:15px;height:15px;flex-shrink:0}
+.snb{margin-left:auto;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700}
+.snb-r{background:var(--red-dim);color:var(--red)}
+.snb-g{background:var(--green-dim);color:var(--green)}
+.snb-b{background:var(--blue-dim);color:var(--blue)}
+.sfooter{padding:12px;border-top:1px solid var(--border)}
+.suser{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;cursor:pointer}
+.suser:hover{background:var(--s2)}
+.sava{width:30px;height:30px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+/* MAIN */
+.main{margin-left:220px;flex:1}
+.topbar{height:54px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:100}
+.tb-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;flex:1}
+.tb-badge{background:var(--red-dim);color:var(--red);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{background:var(--s2);color:var(--t1);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2)}
+.btn-success{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,63,94,.2)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 9px;font-size:11px}
+
+/* PAGES */
+.page{display:none;padding:24px;animation:fi .2s ease}
+.page.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px}
+.pt{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:22px}
+.ps{color:var(--t2);font-size:13px;margin-top:2px}
+
+/* KPI */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;transition:border-color .2s}
+.kpi:hover{border-color:var(--border2)}
+.kpi::before{content:'';position:absolute;top:-10px;right:-10px;width:70px;height:70px;border-radius:50%;filter:blur(30px);opacity:.3}
+.kpi.bl::before{background:var(--blue)}.kpi.gr::before{background:var(--green)}.kpi.rd::before{background:var(--red)}.kpi.am::before{background:var(--amber)}
+.ki{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:10px}
+.ki.bl{background:var(--blue-dim)}.ki.gr{background:var(--green-dim)}.ki.rd{background:var(--red-dim)}.ki.am{background:var(--amber-dim)}
+.kv{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;line-height:1;margin-bottom:4px}
+.kv.bl{color:var(--blue)}.kv.gr{color:var(--green)}.kv.rd{color:var(--red)}.kv.am{color:var(--amber)}
+.kl{font-size:12px;color:var(--t2)}
+.kd{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:5px}
+.kd.up{background:var(--green-dim);color:var(--green)}
+.kd.dn{background:var(--red-dim);color:var(--red)}
+
+/* TABLE */
+.tw{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.ttb{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.tsearch{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 11px}
+.tsearch input{background:none;border:none;outline:none;color:var(--t1);font-family:inherit;font-size:13px;width:180px}
+.tsearch input::placeholder{color:var(--t3)}
+.mla{margin-left:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+td{padding:11px 14px;font-size:13px;vertical-align:middle}
+.sb{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.sb::before{content:'';width:5px;height:5px;border-radius:50%}
+.s-pro{background:var(--blue-dim);color:var(--blue)}.s-pro::before{background:var(--blue)}
+.s-free{background:var(--s2);color:var(--t3)}.s-free::before{background:var(--t3)}
+.s-pend{background:var(--amber-dim);color:var(--amber)}.s-pend::before{background:var(--amber)}
+.s-act{background:var(--green-dim);color:var(--green)}.s-act::before{background:var(--green)}
+.s-rej{background:var(--red-dim);color:var(--red)}.s-rej::before{background:var(--red)}
+.ra{display:flex;gap:3px;justify-content:flex-end}
+.ab{width:26px;height:26px;border-radius:6px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .15s;color:var(--t2)}
+.ab:hover{border-color:var(--border2);color:var(--t1)}
+
+/* CHART */
+.chart-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:18px}
+.chart-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:140px}
+.bc-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
+.bc-bar{width:100%;border-radius:4px 4px 0 0;transition:opacity .2s;cursor:pointer;min-height:4px}
+.bc-bar:hover{opacity:.75}
+.bc-label{font-size:10px;color:var(--t3);text-align:center}
+.bc-val{font-size:10px;font-weight:600;color:var(--t2)}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.mo.open{display:flex}
+.md{background:var(--s1);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:mi .2s ease;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+@keyframes mi{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+.mh{padding:18px 22px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--s1);z-index:1}
+.mt{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;flex:1}
+.mc{width:28px;height:28px;border-radius:7px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2)}
+.mc:hover{color:var(--t1)}
+.mb{padding:20px}
+.mf{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fm{display:flex;flex-direction:column;gap:5px}
+.fm.s2{grid-column:span 2}
+label{font-size:12px;font-weight:600;color:var(--t2)}
+input,select,textarea{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--t1);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+select option{background:var(--s2)}
+
+/* TOAST */
+.tw-wrap{position:fixed;bottom:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--s1);border:1px solid var(--border2);border-radius:10px;padding:11px 16px;font-size:13px;min-width:260px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:tin .25s ease;font-weight:500}
+.toast.success{border-left:3px solid var(--green)}.toast.error{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--blue)}
+@keyframes tin{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+/* SPINNER */
+.spin{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--t2)}
+
+/* REVENUE CARD */
+.rev-card{background:linear-gradient(135deg,var(--blue),#22d3ee);border-radius:14px;padding:24px;color:#fff;margin-bottom:18px}
+.rev-label{font-size:12px;opacity:.7;margin-bottom:6px}
+.rev-val{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:36px;margin-bottom:4px}
+.rev-sub{font-size:12px;opacity:.7}
+
+/* NOTIF PAIEMENT */
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px}
+.notif-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.notif-content{flex:1}
+.notif-title{font-weight:600;font-size:13px;margin-bottom:3px}
+.notif-meta{font-size:12px;color:var(--t2)}
+.notif-actions{display:flex;gap:6px;margin-top:8px}
+
+@media(max-width:900px){.kgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap" style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="lmark">N</div>
+      <div class="lname">NexaFlow</div>
+      <span class="sbadge">ADMIN</span>
+    </div>
+    <div class="login-title">Accès Administrateur</div>
+    <div class="login-sub">Tableau de bord de gestion NexaFlow</div>
+    <div class="form-field">
+      <label>Email admin</label>
+      <input type="email" id="adminEmail" placeholder="admin@nexaflow.dz" value="admin@nexaflow.dz">
+    </div>
+    <div class="form-field">
+      <label>Mot de passe</label>
+      <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    </div>
+    <div class="form-field">
+      <label>URL Supabase</label>
+      <input type="text" id="adminSbUrl" placeholder="https://XXXX.supabase.co">
+    </div>
+    <div class="form-field">
+      <label>Service Role Key (pas la anon key !)</label>
+      <input type="text" id="adminSbKey" placeholder="eyJhbGci... (service_role)">
+    </div>
+    <button class="login-btn" onclick="doAdminLogin()">Accéder au dashboard</button>
+    <div class="login-err" id="loginErr"></div>
+    <div style="text-align:center;margin-top:14px">
+      <button onclick="demoAdmin()" style="background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer;font-family:inherit">Mode démo (sans Supabase) →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LAYOUT -->
+<div class="layout" id="adminLayout" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="smark">N</div>
+      <div class="sname">Admin</div>
+      <span class="sbadge">🔴 LIVE</span>
+    </div>
+    <nav class="snav">
+      <div class="sni active" onclick="goPage('dashboard',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="snav-lbl">Utilisateurs</div>
+      <div class="sni" onclick="goPage('users',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Tous les users <span class="snb snb-b" id="nb_users">0</span>
+      </div>
+      <div class="sni" onclick="goPage('pro_users',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Abonnés Pro <span class="snb snb-g" id="nb_pro">0</span>
+      </div>
+      <div class="snav-lbl">Paiements</div>
+      <div class="sni" onclick="goPage('paiements',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Paiements <span class="snb snb-r" id="nb_pending">0</span>
+      </div>
+      <div class="sni" onclick="goPage('revenus',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Revenus
+      </div>
+      <div class="snav-lbl">Système</div>
+      <div class="sni" onclick="goPage('parametres',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Paramètres
+      </div>
+    </nav>
+    <div class="sfooter">
+      <div class="suser" onclick="logout()">
+        <div class="sava">A</div>
+        <div>
+          <div style="font-size:12px;font-weight:600" id="adminName">Admin</div>
+          <div style="font-size:10px;color:var(--t3)">Se déconnecter</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="tb-title" id="topbarTitle">Dashboard</div>
+      <div id="topbarActions"></div>
+    </header>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div style="padding:24px">
+        <div class="ph">
+          <div><div class="pt">Vue d'ensemble</div><div class="ps" id="dashDate">Chargement…</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="refreshAll()">🔄 Actualiser</button>
+            <button class="btn btn-primary btn-sm" onclick="goPage('paiements',null)">💳 Paiements en attente</button>
+          </div>
+        </div>
+
+        <!-- Revenue Card -->
+        <div class="rev-card">
+          <div class="rev-label">💰 REVENUS TOTAUX CE MOIS</div>
+          <div class="rev-val" id="revTotal">0 DA</div>
+          <div class="rev-sub" id="revSub">0 abonnés Pro × 990 DA</div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kgrid">
+          <div class="kpi bl"><div class="ki bl">👥</div><div class="kv bl" id="k_users">0</div><div class="kl">Utilisateurs total</div><span class="kd up" id="k_users_d">↑ +0</span></div>
+          <div class="kpi gr"><div class="ki gr">⭐</div><div class="kv gr" id="k_pro">0</div><div class="kl">Abonnés Pro</div><span class="kd up" id="k_pro_d">↑ +0</span></div>
+          <div class="kpi am"><div class="ki am">⏳</div><div class="kv am" id="k_pend">0</div><div class="kl">Paiements en attente</div></div>
+          <div class="kpi rd"><div class="ki rd">📈</div><div class="kv rd" id="k_conv">0%</div><div class="kl">Taux conversion</div></div>
+        </div>
+
+        <!-- Graphique revenus mensuels -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="chart-wrap">
+            <div class="chart-title">📊 Revenus mensuels (DA)</div>
+            <div class="bar-chart" id="revenueChart"></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title">👥 Nouveaux utilisateurs</div>
+            <div class="bar-chart" id="usersChart"></div>
+          </div>
+        </div>
+
+        <!-- Derniers paiements -->
+        <div class="tw">
+          <div class="ttb">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px">Derniers paiements reçus</span>
+            <div class="mla"><button class="btn btn-ghost btn-sm" onclick="goPage('paiements',null)">Voir tout →</button></div>
+          </div>
+          <table>
+            <thead><tr><th>Utilisateur</th><th>Montant</th><th>Date</th><th>Statut</th></tr></thead>
+            <tbody id="dashPaiements"><tr><td colspan="4"><div class="loading"><div class="spin"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div class="page" id="page-users">
+      <div style="padding:24px">
+        <div class="ph">
+          <div><div class="pt">Utilisateurs</div><div class="ps" id="usersSub">Chargement…</div></div>
+          <button class="btn btn-primary btn-sm" onclick="exportUsersCSV()">📤 Export CSV</button>
+        </div>
+        <div class="tw">
+          <div class="ttb">
+            <div class="tsearch">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input placeholder="Rechercher email, nom…" oninput="filterUsers(this.value)">
+            </div>
+            <select onchange="filterUsersplan(this.value)" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--t1);font-family:inherit;font-size:12px">
+              <option value="">Tous les plans</option>
+              <option value="pro">Pro</option>
+              <option value="free">Gratuit</option>
+            </select>
+            <div class="mla" style="font-size:12px;color:var(--t3)" id="usersCount"></div>
+          </div>
+          <table>
+            <thead><tr><th>Email</th><th>Nom</th><th>Plan</th><th>Inscrit le</th><th>Dernière connexion</th><th>Factures</th><th></th></tr></thead>
+            <tbody id="usersTable"><tr><td colspan="7"><div class="loading"><div class="spin"></div></div></td></tr></tbody>
+          </table>
+          <div style="padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--t3)" id="usersPg">—</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="usersPg(-1)">← Préc.</button>
+              <button class="btn btn-ghost btn-sm" onclick="usersPg(1)">Suiv. →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PRO USERS ══ -->
+    <div class="page" id="page-pro_users">
+      <div style="padding:24px">
+        <div class="ph">
+          <div><div class="pt">Abonnés Pro</div><div class="ps" id="proSub">Utilisateurs avec plan payant</div></div>
+        </div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Email</th><th>Nom</th><th>Date activation</th><th>Expiration</th><th>Revenus générés</th><th></th></tr></thead>
+            <tbody id="proTable"><tr><td colspan="6"><div class="loading"><div class="spin"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAIEMENTS ══ -->
+    <div class="page" id="page-paiements">
+      <div style="padding:24px">
+        <div class="ph">
+          <div><div class="pt">Gestion des Paiements</div><div class="ps">Validez les paiements BaridiMob / CCP reçus</div></div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('moAddPaiement')">+ Enregistrer paiement</button>
+        </div>
+
+        <!-- Paiements en attente -->
+        <div style="margin-bottom:20px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--amber)">⏳ En attente de validation</div>
+          <div id="pendingPaiements"></div>
+        </div>
+
+        <!-- Historique -->
+        <div class="tw">
+          <div class="ttb">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px">Historique des paiements</span>
+          </div>
+          <table>
+            <thead><tr><th>Date</th><th>Email user</th><th>Montant</th><th>Mode</th><th>Référence</th><th>Statut</th><th></th></tr></thead>
+            <tbody id="paiementsTable"><tr><td colspan="7"><div class="loading"><div class="spin"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REVENUS ══ -->
+    <div class="page" id="page-revenus">
+      <div style="padding:24px">
+        <div class="ph"><div><div class="pt">Revenus & Analytics</div><div class="ps">Suivi financier détaillé</div></div></div>
+        <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kpi gr"><div class="ki gr">💰</div><div class="kv gr" id="rv_mois">0 DA</div><div class="kl">Ce mois</div></div>
+          <div class="kpi bl"><div class="ki bl">📅</div><div class="kv bl" id="rv_annee">0 DA</div><div class="kl">Cette année</div></div>
+          <div class="kpi am"><div class="ki am">🎯</div><div class="kv am" id="rv_proj">0 DA</div><div class="kl">Projection annuelle</div></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">💰 Évolution des revenus (DA/mois)</div>
+          <div class="bar-chart" id="revenueFullChart"></div>
+        </div>
+        <div class="tw">
+          <div class="ttb"><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px">Détail mensuel</span></div>
+          <table>
+            <thead><tr><th>Mois</th><th>Nouveaux Pro</th><th>Renouvellements</th><th>Churns</th><th>Net Pro</th><th>Revenus</th></tr></thead>
+            <tbody id="revenueTable"><tr><td colspan="6"><div class="loading"><div class="spin"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PARAMÈTRES ══ -->
+    <div class="page" id="page-parametres">
+      <div style="padding:24px">
+        <div class="ph"><div><div class="pt">Paramètres système</div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="tw" style="margin-bottom:0">
+            <div class="ttb"><span style="font-weight:700;font-size:13px">💎 Prix des plans</span></div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div class="fm"><label>Prix Plan Pro (DA/mois)</label><input type="number" id="prixPro" value="990"></div>
+              <div class="fm"><label>Email de réception paiements</label><input type="email" id="emailPaiement" value="nexaflow.pro@gmail.com"></div>
+              <div class="fm"><label>Numéro CCP</label><input type="text" id="ccp" value="123456789"></div>
+              <div class="fm"><label>Clé CCP</label><input type="text" id="ccpKey" value="78"></div>
+              <button class="btn btn-primary btn-sm" onclick="savePrix()">💾 Enregistrer</button>
+            </div>
+          </div>
+          <div class="tw" style="margin-bottom:0">
+            <div class="ttb"><span style="font-weight:700;font-size:13px">🔗 Connexion Supabase</span></div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div class="fm"><label>URL Supabase</label><input type="text" id="cfgUrl" placeholder="https://XXXX.supabase.co"></div>
+              <div class="fm"><label>Service Role Key</label><input type="text" id="cfgKey" placeholder="eyJhbGci..."></div>
+              <button class="btn btn-primary btn-sm" onclick="saveAdminConfig()">💾 Sauvegarder</button>
+              <div id="cfgStatus" style="font-size:12px;color:var(--t2)"></div>
+            </div>
+          </div>
+          <!-- Publicités -->
+          <div class="tw" style="margin-bottom:0;grid-column:span 2">
+            <div class="ttb"><span style="font-weight:700;font-size:13px">📢 Gestion des publicités</span></div>
+            <div style="padding:16px">
+              <div style="font-size:13px;color:var(--t2);margin-bottom:14px">Les publicités s'affichent aux utilisateurs du plan gratuit. Modifiez-les ici.</div>
+              <div id="adsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+              <button class="btn btn-ghost btn-sm" onclick="addAd()">+ Ajouter une pub</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- MODAL : Enregistrer paiement manuellement -->
+<div class="mo" id="moAddPaiement">
+  <div class="md">
+    <div class="mh"><div class="mt">💳 Enregistrer un paiement</div><div class="mc" onclick="closeModal('moAddPaiement')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fm s2"><label>Email de l'utilisateur *</label><input type="email" id="pay_email" placeholder="user@email.com"></div>
+        <div class="fm"><label>Montant (DA)</label><input type="number" id="pay_montant" value="990"></div>
+        <div class="fm"><label>Mode de paiement</label>
+          <select id="pay_mode"><option value="baridimob">BaridiMob</option><option value="ccp">CCP</option><option value="virement">Virement</option></select>
+        </div>
+        <div class="fm"><label>Référence / N° transaction</label><input type="text" id="pay_ref" placeholder="REF-XXXXXX"></div>
+        <div class="fm"><label>Date du paiement</label><input type="date" id="pay_date"></div>
+        <div class="fm"><label>Durée (mois)</label><input type="number" id="pay_duree" value="1" min="1" max="12"></div>
+        <div class="fm s2"><label>Notes</label><input type="text" id="pay_notes" placeholder="Optionnel"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-ghost" onclick="closeModal('moAddPaiement')">Annuler</button>
+      <button class="btn btn-success" onclick="validerPaiement()">✅ Valider et activer Pro</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Détail user -->
+<div class="mo" id="moUser">
+  <div class="md">
+    <div class="mh"><div class="mt" id="moUserTitle">Utilisateur</div><div class="mc" onclick="closeModal('moUser')">✕</div></div>
+    <div class="mb" id="moUserBody"></div>
+    <div class="mf">
+      <button class="btn btn-ghost" onclick="closeModal('moUser')">Fermer</button>
+      <button class="btn btn-danger btn-sm" id="moUserBanBtn">🚫 Suspendre</button>
+      <button class="btn btn-success" id="moUserProBtn">⭐ Activer Pro</button>
+    </div>
+  </div>
+</div>
+
+<div class="tw-wrap" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+let ADMIN_CFG = JSON.parse(localStorage.getItem('nxf_admin_cfg')||'{"url":"","key":""}');
+let allUsers = [], allPaiements = [], allProUsers = [];
+let usersOffset = 0;
+const PAGE_SIZE = 20;
+let usersFilter = { search:'', plan:'' };
+
+// Publicités par défaut
+let ADS_LIST = JSON.parse(localStorage.getItem('nxf_ads')||JSON.stringify([
+  "🏦 CPA Logiciel Comptable — Essai gratuit 30 jours",
+  "📦 Brico Pro Oran — Matériaux livraison Oran",
+  "💻 Formation Excel & Comptabilité — 5 jours",
+  "🚗 Assurance auto Algérie — Devis en ligne",
+  "📱 Smartphone Galaxy A55 — Livraison 48h Algérie",
+]));
+
+// ══════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════
+function doAdminLogin() {
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass  = document.getElementById('adminPass').value;
+  const url   = document.getElementById('adminSbUrl').value.trim();
+  const key   = document.getElementById('adminSbKey').value.trim();
+
+  if (pass !== 'nexaflow2026' && pass !== 'admin123') {
+    document.getElementById('loginErr').textContent = 'Mot de passe incorrect';
+    document.getElementById('loginErr').style.display = 'block';
+    return;
+  }
+  if (url) ADMIN_CFG.url = url;
+  if (key) ADMIN_CFG.key = key;
+  localStorage.setItem('nxf_admin_cfg', JSON.stringify(ADMIN_CFG));
+  enterAdmin(email);
+}
+
+function demoAdmin() { enterAdmin('admin@nexaflow.dz'); }
+
+function enterAdmin(email) {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('adminLayout').style.display = 'flex';
+  document.getElementById('adminName').textContent = email.split('@')[0];
+  document.getElementById('cfgUrl').value = ADMIN_CFG.url||'';
+  document.getElementById('cfgKey').value = ADMIN_CFG.key||'';
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('fr-DZ',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  loadAll();
+  renderAds();
+}
+
+function logout() {
+  document.getElementById('adminLayout').style.display = 'none';
+  document.getElementById('loginWrap').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════
+// API SUPABASE
+// ══════════════════════════════════════════
+async function sbAdmin(path, opts={}) {
+  if (!ADMIN_CFG.url || !ADMIN_CFG.key) return getDemoData(path);
+  const res = await fetch(ADMIN_CFG.url+'/rest/v1/'+path, {
+    method: opts.method||'GET',
+    headers: {
+      'apikey': ADMIN_CFG.key,
+      'Authorization': 'Bearer '+ADMIN_CFG.key,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer||'return=representation',
+      ...opts.headers
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  if (res.status===204) return [];
+  return res.json();
+}
+
+async function sbAuth(path, opts={}) {
+  if (!ADMIN_CFG.url || !ADMIN_CFG.key) return getDemoAuthData(path);
+  const res = await fetch(ADMIN_CFG.url+'/auth/v1/'+path, {
+    method: opts.method||'GET',
+    headers: {
+      'apikey': ADMIN_CFG.key,
+      'Authorization': 'Bearer '+ADMIN_CFG.key,
+      'Content-Type': 'application/json',
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ══════════════════════════════════════════
+// DEMO DATA
+// ══════════════════════════════════════════
+function getDemoData(path) {
+  if (path.includes('saas_paiements')) return DEMO_PAIEMENTS;
+  return [];
+}
+function getDemoAuthData() { return { users: DEMO_USERS }; }
+
+const DEMO_USERS = [
+  {id:'1',email:'ahmed.benali@gmail.com',user_metadata:{full_name:'Ahmed Benali',plan:'pro',plan_expires:'2026-06-11'},created_at:'2026-04-01',last_sign_in_at:'2026-05-11'},
+  {id:'2',email:'samir.ramdane@outlook.com',user_metadata:{full_name:'Samir Ramdane',plan:'free'},created_at:'2026-04-10',last_sign_in_at:'2026-05-10'},
+  {id:'3',email:'fatima.zerrouki@gmail.com',user_metadata:{full_name:'Fatima Zerrouki',plan:'pro',plan_expires:'2026-06-01'},created_at:'2026-03-15',last_sign_in_at:'2026-05-09'},
+  {id:'4',email:'karim.berrabah@techno.dz',user_metadata:{full_name:'Karim Berrabah',plan:'free'},created_at:'2026-04-20',last_sign_in_at:'2026-05-08'},
+  {id:'5',email:'nassim.hadj@infopro.dz',user_metadata:{full_name:'Nassim Hadj',plan:'pro',plan_expires:'2026-07-01'},created_at:'2026-03-01',last_sign_in_at:'2026-05-11'},
+  {id:'6',email:'dalal.sini@gmail.com',user_metadata:{full_name:'Dalal Sini',plan:'free'},created_at:'2026-05-01',last_sign_in_at:'2026-05-11'},
+  {id:'7',email:'med.chaabane@gmail.com',user_metadata:{full_name:'Mohamed Chaabane',plan:'pro',plan_expires:'2026-06-15'},created_at:'2026-04-05',last_sign_in_at:'2026-05-07'},
+  {id:'8',email:'hichem.bouali@oran.dz',user_metadata:{full_name:'Hichem Bouali',plan:'free'},created_at:'2026-05-05',last_sign_in_at:'2026-05-10'},
+];
+
+const DEMO_PAIEMENTS = [
+  {id:'1',user_email:'ahmed.benali@gmail.com',montant:990,mode:'baridimob',reference:'BM-2026050001',date_paiement:'2026-05-01',statut:'valide',notes:''},
+  {id:'2',user_email:'fatima.zerrouki@gmail.com',montant:990,mode:'ccp',reference:'CCP-20260415',date_paiement:'2026-04-15',statut:'valide',notes:''},
+  {id:'3',user_email:'nassim.hadj@infopro.dz',montant:990,mode:'virement',reference:'VIR-20260301',date_paiement:'2026-03-01',statut:'valide',notes:''},
+  {id:'4',user_email:'med.chaabane@gmail.com',montant:990,mode:'baridimob',reference:'BM-2026040502',date_paiement:'2026-04-05',statut:'valide',notes:''},
+  {id:'5',user_email:'pending.user@gmail.com',montant:990,mode:'baridimob',reference:'BM-2026051001',date_paiement:'2026-05-10',statut:'en_attente',notes:'En attente de vérification'},
+  {id:'6',user_email:'autre.user@gmail.com',montant:990,mode:'ccp',reference:'CCP-20260509',date_paiement:'2026-05-09',statut:'en_attente',notes:''},
+];
+
+// ══════════════════════════════════════════
+// LOAD ALL DATA
+// ══════════════════════════════════════════
+async function loadAll() {
+  await Promise.all([loadUsers(), loadPaiements()]);
+  renderDashboard();
+  renderRevenue();
+}
+
+async function refreshAll() { await loadAll(); toast('Données actualisées ✅','success'); }
+
+async function loadUsers() {
+  try {
+    const data = await sbAuth('admin/users?per_page=1000');
+    allUsers = data.users || DEMO_USERS;
+    allProUsers = allUsers.filter(u=>u.user_metadata?.plan==='pro');
+    updateBadges();
+  } catch(e) {
+    allUsers = DEMO_USERS;
+    allProUsers = allUsers.filter(u=>u.user_metadata?.plan==='pro');
+  }
+}
+
+async function loadPaiements() {
+  try {
+    allPaiements = await sbAdmin('saas_paiements?order=created_at.desc&limit=200');
+    if (!allPaiements.length) allPaiements = DEMO_PAIEMENTS;
+  } catch(e) { allPaiements = DEMO_PAIEMENTS; }
+}
+
+function updateBadges() {
+  document.getElementById('nb_users').textContent = allUsers.length;
+  document.getElementById('nb_pro').textContent = allProUsers.length;
+  const pending = allPaiements.filter(p=>p.statut==='en_attente').length;
+  document.getElementById('nb_pending').textContent = pending || '';
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+function renderDashboard() {
+  const total = allProUsers.length * 990;
+  document.getElementById('k_users').textContent = allUsers.length;
+  document.getElementById('k_pro').textContent = allProUsers.length;
+  document.getElementById('k_pend').textContent = allPaiements.filter(p=>p.statut==='en_attente').length;
+  document.getElementById('k_conv').textContent = allUsers.length ? Math.round(allProUsers.length/allUsers.length*100)+'%' : '0%';
+  document.getElementById('revTotal').textContent = total.toLocaleString('fr-DZ')+' DA';
+  document.getElementById('revSub').textContent = `${allProUsers.length} abonnés Pro × 990 DA`;
+
+  // Derniers paiements
+  const recent = allPaiements.slice(0,5);
+  document.getElementById('dashPaiements').innerHTML = recent.length ?
+    recent.map(p=>`<tr>
+      <td>${p.user_email}</td>
+      <td style="font-weight:700;color:var(--green)">${p.montant.toLocaleString('fr-DZ')} DA</td>
+      <td>${fmtDate(p.date_paiement)}</td>
+      <td>${stBadge(p.statut)}</td>
+    </tr>`).join('') :
+    '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--t3)">Aucun paiement</td></tr>';
+
+  // Charts
+  renderChart('revenueChart', [0,0,990,1980,990,3960,allProUsers.length*990], ['Nov','Déc','Jan','Fév','Mar','Avr','Mai'], '#3b7eff');
+  renderChart('usersChart', [2,3,5,8,12,18,allUsers.length], ['Nov','Déc','Jan','Fév','Mar','Avr','Mai'], '#22c55e');
+}
+
+function renderRevenue() {
+  const moisActuel = allProUsers.length * 990;
+  document.getElementById('rv_mois').textContent = moisActuel.toLocaleString('fr-DZ')+' DA';
+  document.getElementById('rv_annee').textContent = (moisActuel*5).toLocaleString('fr-DZ')+' DA';
+  document.getElementById('rv_proj').textContent = (moisActuel*12).toLocaleString('fr-DZ')+' DA';
+
+  renderChart('revenueFullChart', [0,990,1980,990,2970,3960,moisActuel], ['Nov','Déc','Jan','Fév','Mar','Avr','Mai'], '#3b7eff');
+
+  const mois = ['Novembre','Décembre','Janvier','Février','Mars','Avril','Mai'];
+  const pros  = [0,1,2,1,3,4,allProUsers.length];
+  document.getElementById('revenueTable').innerHTML = mois.map((m,i)=>`
+    <tr>
+      <td>${m} 2026</td>
+      <td>${Math.max(0,pros[i]-(i>0?pros[i-1]:0))}</td>
+      <td>${i>0?pros[i-1]:0}</td>
+      <td>0</td>
+      <td>${pros[i]}</td>
+      <td style="font-weight:700;color:var(--green)">${(pros[i]*990).toLocaleString('fr-DZ')} DA</td>
+    </tr>`).join('');
+}
+
+function renderChart(id, data, labels, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const max = Math.max(...data, 1);
+  el.innerHTML = data.map((v,i) => `
+    <div class="bc-col">
+      <div class="bc-val">${v>=1000?(v/1000).toFixed(1)+'K':v}</div>
+      <div class="bc-bar" style="height:${Math.round((v/max)*110)}px;background:${color};opacity:${i===data.length-1?1:0.5}"></div>
+      <div class="bc-label">${labels[i]}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// USERS TABLE
+// ══════════════════════════════════════════
+function renderUsers() {
+  let data = [...allUsers];
+  if (usersFilter.search) data = data.filter(u=>(u.email+' '+(u.user_metadata?.full_name||'')).toLowerCase().includes(usersFilter.search.toLowerCase()));
+  if (usersFilter.plan==='pro') data = data.filter(u=>u.user_metadata?.plan==='pro');
+  if (usersFilter.plan==='free') data = data.filter(u=>u.user_metadata?.plan!=='pro');
+
+  document.getElementById('usersSub').textContent = `${data.length} utilisateurs`;
+  document.getElementById('usersCount').textContent = `${data.length} résultat(s)`;
+  document.getElementById('usersPg').textContent = `Page ${Math.floor(usersOffset/PAGE_SIZE)+1}`;
+
+  const page = data.slice(usersOffset, usersOffset+PAGE_SIZE);
+  document.getElementById('usersTable').innerHTML = page.map(u=>`
+    <tr>
+      <td>${u.email}</td>
+      <td>${u.user_metadata?.full_name||'—'}</td>
+      <td>${u.user_metadata?.plan==='pro' ? '<span class="sb s-pro">Pro ⭐</span>' : '<span class="sb s-free">Gratuit</span>'}</td>
+      <td style="color:var(--t2);font-size:12px">${fmtDate(u.created_at)}</td>
+      <td style="color:var(--t2);font-size:12px">${fmtDate(u.last_sign_in_at)}</td>
+      <td style="color:var(--t2)">—</td>
+      <td><div class="ra">
+        <div class="ab" onclick="viewUser('${u.id}')" title="Voir">👁️</div>
+        <div class="ab" onclick="activatePro('${u.email}')" title="Activer Pro">⭐</div>
+        <div class="ab" onclick="suspendUser('${u.id}')" title="Suspendre">🚫</div>
+      </div></td>
+    </tr>`).join('');
+}
+
+function filterUsers(v) { usersFilter.search=v; usersOffset=0; renderUsers(); }
+function filterUsersplan(v) { usersFilter.plan=v; usersOffset=0; renderUsers(); }
+function usersPg(d) { usersOffset=Math.max(0,usersOffset+d*PAGE_SIZE); renderUsers(); }
+
+// ══════════════════════════════════════════
+// PRO USERS
+// ══════════════════════════════════════════
+function renderProUsers() {
+  document.getElementById('proSub').textContent = `${allProUsers.length} abonnés actifs — ${allProUsers.length*990} DA/mois`;
+  document.getElementById('proTable').innerHTML = allProUsers.map(u=>`
+    <tr>
+      <td>${u.email}</td>
+      <td>${u.user_metadata?.full_name||'—'}</td>
+      <td>${fmtDate(u.user_metadata?.plan_start||u.created_at)}</td>
+      <td style="color:${isExpired(u.user_metadata?.plan_expires)?'var(--red)':'var(--green)'}">${fmtDate(u.user_metadata?.plan_expires)||'—'}</td>
+      <td style="font-weight:700;color:var(--green)">990 DA/mois</td>
+      <td><div class="ra">
+        <div class="ab" onclick="renewPro('${u.email}')" title="Renouveler">🔄</div>
+        <div class="ab" onclick="revokePro('${u.email}')" title="Révoquer">❌</div>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--t3)">Aucun abonné Pro</td></tr>';
+}
+
+// ══════════════════════════════════════════
+// PAIEMENTS
+// ══════════════════════════════════════════
+function renderPaiements() {
+  // Paiements en attente
+  const pending = allPaiements.filter(p=>p.statut==='en_attente');
+  document.getElementById('pendingPaiements').innerHTML = pending.length ?
+    pending.map(p=>`
+      <div class="notif-item">
+        <div class="notif-ico" style="background:var(--amber-dim)">💳</div>
+        <div class="notif-content">
+          <div class="notif-title">${p.user_email} — ${p.montant} DA</div>
+          <div class="notif-meta">${p.mode.toUpperCase()} · Réf: ${p.reference} · ${fmtDate(p.date_paiement)}</div>
+          ${p.notes?`<div style="font-size:12px;color:var(--t2);margin-top:4px">${p.notes}</div>`:''}
+          <div class="notif-actions">
+            <button class="btn btn-success btn-xs" onclick="validerPaiementId('${p.id}','${p.user_email}')">✅ Valider et activer Pro</button>
+            <button class="btn btn-danger btn-xs" onclick="rejeterPaiement('${p.id}')">❌ Rejeter</button>
+          </div>
+        </div>
+      </div>`).join('') :
+    '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">✅ Aucun paiement en attente</div>';
+
+  // Historique
+  document.getElementById('paiementsTable').innerHTML = allPaiements.map(p=>`
+    <tr>
+      <td>${fmtDate(p.date_paiement)}</td>
+      <td>${p.user_email}</td>
+      <td style="font-weight:700;color:var(--green)">${p.montant} DA</td>
+      <td><span style="text-transform:uppercase;font-size:11px">${p.mode}</span></td>
+      <td style="font-size:12px;color:var(--t2)">${p.reference}</td>
+      <td>${stBadge(p.statut)}</td>
+      <td><div class="ra">
+        ${p.statut==='en_attente'?`<div class="ab" onclick="validerPaiementId('${p.id}','${p.user_email}')" title="Valider">✅</div>`:''}
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--t3)">Aucun paiement</td></tr>';
+}
+
+// ══════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════
+async function validerPaiement() {
+  const email = document.getElementById('pay_email').value.trim();
+  const montant = parseFloat(document.getElementById('pay_montant').value)||990;
+  const mode = document.getElementById('pay_mode').value;
+  const ref = document.getElementById('pay_ref').value.trim();
+  const duree = parseInt(document.getElementById('pay_duree').value)||1;
+  if (!email) { toast('Email requis','error'); return; }
+
+  try {
+    // Enregistrer dans Supabase si configuré
+    if (ADMIN_CFG.url && ADMIN_CFG.key) {
+      await sbAdmin('saas_paiements', { method:'POST', body:{
+        user_email:email, montant, mode, reference:ref,
+        date_paiement:document.getElementById('pay_date').value||new Date().toISOString().split('T')[0],
+        statut:'valide', notes:document.getElementById('pay_notes').value, duree_mois:duree
+      }});
+    }
+    // Simuler activation Pro
+    await activatePro(email, duree);
+    closeModal('moAddPaiement');
+    toast(`Pro activé pour ${email} ✅`,'success');
+    await loadPaiements();
+    renderPaiements();
+  } catch(e) { toast('Erreur: '+e.message,'error'); }
+}
+
+async function validerPaiementId(paiementId, email) {
+  try {
+    if (ADMIN_CFG.url && ADMIN_CFG.key) {
+      await sbAdmin(`saas_paiements?id=eq.${paiementId}`, {method:'PATCH', prefer:'return=minimal', body:{statut:'valide'}});
+    }
+    await activatePro(email);
+    allPaiements = allPaiements.map(p=>p.id===paiementId?{...p,statut:'valide'}:p);
+    renderPaiements();
+    toast(`Pro activé pour ${email} ✅`,'success');
+  } catch(e) { toast('Erreur: '+e.message,'error'); }
+}
+
+async function rejeterPaiement(id) {
+  if (!confirm('Rejeter ce paiement ?')) return;
+  if (ADMIN_CFG.url && ADMIN_CFG.key) {
+    await sbAdmin(`saas_paiements?id=eq.${id}`, {method:'PATCH', prefer:'return=minimal', body:{statut:'rejete'}});
+  }
+  allPaiements = allPaiements.map(p=>p.id===id?{...p,statut:'rejete'}:p);
+  renderPaiements();
+  toast('Paiement rejeté','info');
+}
+
+async function activatePro(email, duree=1) {
+  const expires = new Date();
+  expires.setMonth(expires.getMonth() + duree);
+  // En production: mettre à jour user_metadata via Supabase Admin API
+  // Ici on simule
+  const u = allUsers.find(u=>u.email===email);
+  if (u) {
+    u.user_metadata = {...u.user_metadata, plan:'pro', plan_expires:expires.toISOString().split('T')[0], plan_start:new Date().toISOString().split('T')[0]};
+    allProUsers = allUsers.filter(u=>u.user_metadata?.plan==='pro');
+    updateBadges();
+  }
+  toast(`✅ Pro activé pour ${email} jusqu'au ${expires.toLocaleDateString('fr-DZ')}`,'success');
+}
+
+async function revokePro(email) {
+  if (!confirm(`Révoquer le plan Pro de ${email} ?`)) return;
+  const u = allUsers.find(u=>u.email===email);
+  if (u) { u.user_metadata = {...u.user_metadata, plan:'free'}; allProUsers = allUsers.filter(u=>u.user_metadata?.plan==='pro'); updateBadges(); }
+  renderProUsers();
+  toast(`Plan Pro révoqué pour ${email}`,'info');
+}
+
+function renewPro(email) {
+  document.getElementById('pay_email').value = email;
+  openModal('moAddPaiement');
+}
+
+function suspendUser(id) {
+  if (!confirm('Suspendre cet utilisateur ?')) return;
+  toast('Utilisateur suspendu (simulation)','info');
+}
+
+function viewUser(id) {
+  const u = allUsers.find(u=>u.id===id);
+  if (!u) return;
+  document.getElementById('moUserTitle').textContent = u.user_metadata?.full_name||u.email;
+  document.getElementById('moUserBody').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="background:var(--s2);border-radius:8px;padding:14px">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:8px">INFORMATIONS</div>
+        ${[['Email',u.email],['Nom',u.user_metadata?.full_name||'—'],['Plan',u.user_metadata?.plan==='pro'?'⭐ Pro':'Gratuit'],['Inscrit le',fmtDate(u.created_at)],['Dernière connexion',fmtDate(u.last_sign_in_at)],['Expiration Pro',fmtDate(u.user_metadata?.plan_expires)]].map(([k,v])=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span style="color:var(--t2)">${k}</span><span style="font-weight:500">${v}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('moUserProBtn').onclick = ()=>{closeModal('moUser');activatePro(u.email);};
+  document.getElementById('moUserBanBtn').onclick = ()=>{closeModal('moUser');suspendUser(u.id);};
+  openModal('moUser');
+}
+
+function exportUsersCSV() {
+  const rows = ['Email,Nom,Plan,Inscrit le,Dernière connexion',...allUsers.map(u=>`"${u.email}","${u.user_metadata?.full_name||''}","${u.user_metadata?.plan||'free'}","${fmtDate(u.created_at)}","${fmtDate(u.last_sign_in_at)}"`)].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows],{type:'text/csv'}));
+  a.download = 'nexaflow_users_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  toast('Export CSV téléchargé ✅','success');
+}
+
+// ══════════════════════════════════════════
+// PUBLICITÉS
+// ══════════════════════════════════════════
+function renderAds() {
+  document.getElementById('adsList').innerHTML = ADS_LIST.map((ad,i)=>`
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="text" value="${ad}" onchange="ADS_LIST[${i}]=this.value" style="flex:1">
+      <div class="ab" onclick="removeAd(${i})">🗑️</div>
+    </div>`).join('');
+}
+function addAd() { ADS_LIST.push('Nouvelle publicité'); renderAds(); }
+function removeAd(i) { ADS_LIST.splice(i,1); renderAds(); }
+
+function savePrix() {
+  localStorage.setItem('nxf_prix_pro', document.getElementById('prixPro').value);
+  localStorage.setItem('nxf_ads', JSON.stringify(ADS_LIST));
+  toast('Paramètres sauvegardés ✅','success');
+}
+
+function saveAdminConfig() {
+  ADMIN_CFG.url = document.getElementById('cfgUrl').value.trim();
+  ADMIN_CFG.key = document.getElementById('cfgKey').value.trim();
+  localStorage.setItem('nxf_admin_cfg', JSON.stringify(ADMIN_CFG));
+  document.getElementById('cfgStatus').textContent = '✅ Sauvegardé';
+  toast('Configuration sauvegardée','success');
+}
+
+// ══════════════════════════════════════════
+// NAV & UTILS
+// ══════════════════════════════════════════
+const pageLoaders = {
+  dashboard: renderDashboard,
+  users: renderUsers,
+  pro_users: renderProUsers,
+  paiements: renderPaiements,
+  revenus: renderRevenue,
+  parametres: ()=>{},
+};
+const pageNames = {dashboard:'Dashboard',users:'Utilisateurs',pro_users:'Abonnés Pro',paiements:'Paiements',revenus:'Revenus',parametres:'Paramètres'};
+
+function goPage(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = pageNames[id]||id;
+  if (pageLoaders[id]) pageLoaders[id]();
+}
+
+function openModal(id){ document.getElementById(id)?.classList.add('open'); }
+function closeModal(id){ document.getElementById(id)?.classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+function toast(msg,type='info'){
+  const t=document.createElement('div'); t.className='toast '+type;
+  t.innerHTML=(type==='success'?'✅':type==='error'?'❌':'ℹ️')+' '+msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+const fmtDate = d => { if(!d) return '—'; try{return new Date(d).toLocaleDateString('fr-DZ');}catch{return d;} };
+const isExpired = d => d && new Date(d) < new Date();
+
+function stBadge(s){
+  const m={valide:'<span class="sb s-act">Validé</span>',en_attente:'<span class="sb s-pend">En attente</span>',rejete:'<span class="sb s-rej">Rejeté</span>',pro:'<span class="sb s-pro">Pro ⭐</span>',free:'<span class="sb s-free">Gratuit</span>'};
+  return m[s]||`<span class="sb s-free">${s}</span>`;
+}
+
+// Init date paiement
+document.addEventListener('DOMContentLoaded',()=>{
+  const dp = document.getElementById('pay_date');
+  if(dp) dp.value = new Date().toISOString().split('T')[0];
+});
+</script>
+</body>
+</html>

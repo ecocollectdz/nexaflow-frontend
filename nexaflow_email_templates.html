@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaFlow — Email Templates</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+
+<!--
+==============================================
+INSTRUCTIONS D'UTILISATION
+==============================================
+
+Ces templates sont à configurer dans :
+Supabase Dashboard > Authentication > Email Templates
+
+OU utiliser avec n'importe quel service email :
+- Gmail SMTP
+- Brevo (ex-Sendinblue) — gratuit 300 emails/jour
+- Resend — gratuit 3000 emails/mois
+
+Pour envoyer depuis Python (backend HF) :
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+
+    def send_email(to, subject, html):
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = 'NexaFlow <nexaflow.pro@gmail.com>'
+        msg['To'] = to
+        msg.attach(MIMEText(html, 'html'))
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login('nexaflow.pro@gmail.com', 'TON_MOT_DE_PASSE_APP')
+            server.sendmail(msg['From'], to, msg.as_string())
+
+==============================================
+TEMPLATE 1 : BIENVENUE (après inscription)
+==============================================
+-->
+
+<!-- EMAIL 1 : Bienvenue -->
+<div id="email-bienvenue" style="display:none">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:30px 0">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+  <!-- Header -->
+  <tr><td style="background:#0f0e0c;padding:28px 40px;text-align:center">
+    <div style="display:inline-flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#3b7eff,#22d3ee);border-radius:9px;display:inline-block;line-height:36px;text-align:center;font-weight:800;font-size:18px;color:#fff">N</div>
+      <span style="font-size:20px;font-weight:700;color:#fff;vertical-align:middle;margin-left:8px">NexaFlow</span>
+    </div>
+  </td></tr>
+  <!-- Body -->
+  <tr><td style="padding:40px">
+    <h1 style="font-size:26px;color:#0f0e0c;margin:0 0 12px">Bienvenue sur NexaFlow ! 🎉</h1>
+    <p style="font-size:15px;color:#4a4640;line-height:1.7;margin:0 0 20px">Bonjour <strong>{{nom}}</strong>,</p>
+    <p style="font-size:15px;color:#4a4640;line-height:1.7;margin:0 0 24px">Votre compte NexaFlow est créé avec succès. Vous pouvez maintenant gérer votre business algérien avec notre outil de facturation professionnel.</p>
+    <!-- CTA -->
+    <div style="text-align:center;margin:32px 0">
+      <a href="{{app_url}}" style="background:#1a4bdb;color:#fff;padding:14px 32px;border-radius:9px;text-decoration:none;font-size:15px;font-weight:700;display:inline-block">
+        🚀 Accéder à mon compte
+      </a>
+    </div>
+    <!-- Features -->
+    <div style="background:#f8f7f4;border-radius:10px;padding:20px;margin-bottom:24px">
+      <p style="font-size:13px;font-weight:700;color:#0f0e0c;margin:0 0 12px">✅ Ce qui vous attend :</p>
+      <div style="font-size:13px;color:#4a4640;line-height:2">
+        🧾 Créer des factures professionnelles avec RC, NIF, NIS<br>
+        👥 Gérer vos clients et leur historique<br>
+        📊 Exporter en Excel avec mise en forme complète<br>
+        📦 Suivre votre stock en temps réel<br>
+        💳 Trésorerie et rapports financiers
+      </div>
+    </div>
+    <!-- Plan gratuit note -->
+    <div style="border:1px solid #fde68a;background:#fffbeb;border-radius:8px;padding:14px;margin-bottom:24px">
+      <p style="font-size:13px;color:#92400e;margin:0"><strong>📢 Plan Gratuit activé</strong> — Des publicités s'afficheront. Pour les supprimer, passez au <strong>Plan Pro à 990 DA/mois</strong>.</p>
+    </div>
+    <p style="font-size:13px;color:#9a9590;line-height:1.6">Si vous avez des questions, répondez à cet email ou contactez-nous à <a href="mailto:nexaflow.pro@gmail.com" style="color:#1a4bdb">nexaflow.pro@gmail.com</a></p>
+  </td></tr>
+  <!-- Footer -->
+  <tr><td style="background:#f8f7f4;padding:20px 40px;border-top:1px solid #e5e0d8;text-align:center">
+    <p style="font-size:12px;color:#9a9590;margin:0">NexaFlow 🇩🇿 — Fait en Algérie pour les entrepreneurs algériens</p>
+    <p style="font-size:11px;color:#c0b8b0;margin:6px 0 0">Vous recevez cet email car vous avez créé un compte NexaFlow.</p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</div>
+
+<!--
+==============================================
+TEMPLATE 2 : ACTIVATION PRO
+==============================================
+-->
+<div id="email-pro" style="display:none">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:30px 0">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+  <tr><td style="background:linear-gradient(135deg,#1a4bdb,#22d3ee);padding:32px 40px;text-align:center">
+    <div style="font-size:48px;margin-bottom:10px">⭐</div>
+    <h1 style="font-size:24px;color:#fff;margin:0">Bienvenue dans NexaFlow Pro !</h1>
+    <p style="font-size:14px;color:rgba(255,255,255,.8);margin:8px 0 0">Votre abonnement Pro est maintenant actif</p>
+  </td></tr>
+  <tr><td style="padding:36px 40px">
+    <p style="font-size:15px;color:#4a4640;line-height:1.7">Bonjour <strong>{{nom}}</strong>,</p>
+    <p style="font-size:15px;color:#4a4640;line-height:1.7;margin-bottom:24px">Votre paiement de <strong>990 DA</strong> a été reçu et validé. Votre plan Pro est actif jusqu'au <strong>{{date_fin}}</strong>.</p>
+    <!-- Avantages Pro -->
+    <div style="background:#e8eeff;border-radius:10px;padding:20px;margin-bottom:24px">
+      <p style="font-size:13px;font-weight:700;color:#1a4bdb;margin:0 0 12px">🎯 Vos avantages Pro débloqués :</p>
+      <div style="font-size:13px;color:#1e3a8a;line-height:2">
+        ✅ <strong>Zéro publicité</strong> — Expérience épurée<br>
+        ✅ Export Excel professionnel avec mise en forme<br>
+        ✅ Tous les modèles de factures (Éducation, Freelance, Commerce, Service)<br>
+        ✅ Support prioritaire par email<br>
+        ✅ Accès aux nouvelles fonctionnalités en avant-première
+      </div>
+    </div>
+    <!-- Récap paiement -->
+    <div style="border:1px solid #e5e0d8;border-radius:10px;padding:16px;margin-bottom:24px">
+      <p style="font-size:12px;font-weight:700;color:#9a9590;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px">RÉCAP DU PAIEMENT</p>
+      <table width="100%" cellpadding="4" cellspacing="0" style="font-size:13px">
+        <tr><td style="color:#4a4640">Plan</td><td style="text-align:right;font-weight:600">Pro — 1 mois</td></tr>
+        <tr><td style="color:#4a4640">Montant payé</td><td style="text-align:right;font-weight:600">990 DA</td></tr>
+        <tr><td style="color:#4a4640">Mode de paiement</td><td style="text-align:right">{{mode_paiement}}</td></tr>
+        <tr><td style="color:#4a4640">Référence</td><td style="text-align:right;font-family:monospace">{{reference}}</td></tr>
+        <tr><td style="color:#4a4640">Valable jusqu'au</td><td style="text-align:right;font-weight:600;color:#0d8c4e">{{date_fin}}</td></tr>
+      </table>
+    </div>
+    <div style="text-align:center;margin:28px 0">
+      <a href="{{app_url}}" style="background:#1a4bdb;color:#fff;padding:14px 32px;border-radius:9px;text-decoration:none;font-size:15px;font-weight:700;display:inline-block">
+        ✨ Accéder à NexaFlow Pro
+      </a>
+    </div>
+    <!-- Renouvellement -->
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:14px">
+      <p style="font-size:13px;color:#14532d;margin:0">🔔 <strong>Rappel :</strong> Votre abonnement expire le <strong>{{date_fin}}</strong>. Vous recevrez un rappel 5 jours avant pour renouveler.</p>
+    </div>
+  </td></tr>
+  <tr><td style="background:#f8f7f4;padding:20px 40px;border-top:1px solid #e5e0d8;text-align:center">
+    <p style="font-size:12px;color:#9a9590;margin:0">NexaFlow 🇩🇿 · <a href="mailto:nexaflow.pro@gmail.com" style="color:#1a4bdb;text-decoration:none">nexaflow.pro@gmail.com</a></p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</div>
+
+<!--
+==============================================
+TEMPLATE 3 : RAPPEL RENOUVELLEMENT (5 jours avant expiration)
+==============================================
+-->
+<div id="email-rappel" style="display:none">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:30px 0">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+  <tr><td style="background:#0f0e0c;padding:28px 40px">
+    <div style="font-size:14px;color:rgba(255,255,255,.6)">⏰ Votre abonnement expire dans</div>
+    <div style="font-size:40px;font-weight:800;color:#fbbf24">5 jours</div>
+  </td></tr>
+  <tr><td style="padding:36px 40px">
+    <p style="font-size:15px;color:#4a4640;line-height:1.7">Bonjour <strong>{{nom}}</strong>,</p>
+    <p style="font-size:15px;color:#4a4640;line-height:1.7;margin-bottom:24px">Votre abonnement NexaFlow Pro expire le <strong>{{date_fin}}</strong>. Pour continuer à profiter de toutes les fonctionnalités sans publicité, renouvelez maintenant.</p>
+    <!-- Urgence -->
+    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:16px;margin-bottom:24px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">⚠️</div>
+      <p style="font-size:14px;color:#991b1b;font-weight:600;margin:0">Sans renouvellement, les publicités s'afficheront à nouveau après {{date_fin}}</p>
+    </div>
+    <!-- Comment renouveler -->
+    <p style="font-size:14px;font-weight:700;color:#0f0e0c;margin-bottom:12px">Comment renouveler :</p>
+    <div style="background:#f8f7f4;border-radius:10px;padding:16px;margin-bottom:24px">
+      <div style="font-size:13px;color:#4a4640;line-height:2.2">
+        <strong>1.</strong> Envoyez <strong>990 DA</strong> via BaridiMob ou CCP<br>
+        <strong style="font-size:14px;color:#0d8c4e">CCP : 123456789 / Clé 78</strong><br>
+        <strong>2.</strong> Envoyez la preuve à <a href="mailto:nexaflow.pro@gmail.com" style="color:#1a4bdb">nexaflow.pro@gmail.com</a><br>
+        <strong>3.</strong> Activation dans les 2 heures ✅
+      </div>
+    </div>
+    <div style="text-align:center;margin:24px 0">
+      <a href="mailto:nexaflow.pro@gmail.com?subject=Renouvellement Pro - {{email}}" style="background:#0d8c4e;color:#fff;padding:14px 32px;border-radius:9px;text-decoration:none;font-size:15px;font-weight:700;display:inline-block">
+        🔄 Renouveler mon abonnement Pro
+      </a>
+    </div>
+  </td></tr>
+  <tr><td style="background:#f8f7f4;padding:20px 40px;border-top:1px solid #e5e0d8;text-align:center">
+    <p style="font-size:12px;color:#9a9590;margin:0">NexaFlow 🇩🇿 · Vous recevez cet email car votre abonnement Pro expire bientôt.</p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</div>
+
+<!--
+==============================================
+TEMPLATE 4 : PAIEMENT EN ATTENTE DE VALIDATION
+==============================================
+-->
+<div id="email-attente" style="display:none">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:30px 0">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+  <tr><td style="background:#fffbeb;border-bottom:2px solid #fde68a;padding:28px 40px;text-align:center">
+    <div style="font-size:40px;margin-bottom:8px">⏳</div>
+    <h1 style="font-size:20px;color:#92400e;margin:0">Paiement reçu — En cours de vérification</h1>
+  </td></tr>
+  <tr><td style="padding:36px 40px">
+    <p style="font-size:15px;color:#4a4640;line-height:1.7">Bonjour <strong>{{nom}}</strong>,</p>
+    <p style="font-size:15px;color:#4a4640;line-height:1.7;margin-bottom:24px">Nous avons bien reçu votre preuve de paiement. Notre équipe est en train de vérifier votre transaction.</p>
+    <div style="background:#f8f7f4;border-radius:10px;padding:16px;margin-bottom:24px">
+      <p style="font-size:12px;font-weight:700;color:#9a9590;text-transform:uppercase;margin:0 0 10px">VOTRE PAIEMENT</p>
+      <table width="100%" cellpadding="4" cellspacing="0" style="font-size:13px">
+        <tr><td style="color:#4a4640">Montant</td><td style="text-align:right;font-weight:600">990 DA</td></tr>
+        <tr><td style="color:#4a4640">Référence</td><td style="text-align:right;font-family:monospace">{{reference}}</td></tr>
+        <tr><td style="color:#4a4640">Date</td><td style="text-align:right">{{date_paiement}}</td></tr>
+        <tr><td style="color:#4a4640">Statut</td><td style="text-align:right"><span style="background:#fef9c3;color:#92400e;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">En attente</span></td></tr>
+      </table>
+    </div>
+    <p style="font-size:14px;color:#4a4640;line-height:1.7">⏰ <strong>Délai de traitement :</strong> 2 heures maximum. Vous recevrez un email de confirmation dès l'activation de votre compte Pro.</p>
+    <p style="font-size:13px;color:#9a9590;margin-top:20px">Des questions ? Contactez-nous à <a href="mailto:nexaflow.pro@gmail.com" style="color:#1a4bdb">nexaflow.pro@gmail.com</a></p>
+  </td></tr>
+  <tr><td style="background:#f8f7f4;padding:20px 40px;border-top:1px solid #e5e0d8;text-align:center">
+    <p style="font-size:12px;color:#9a9590;margin:0">NexaFlow 🇩🇿 · nexaflow.pro@gmail.com</p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</div>
+
+<script>
+/*
+==============================================
+CODE PYTHON pour envoyer ces emails
+Ajouter dans le backend HF (main.py)
+==============================================
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
+
+GMAIL_USER = os.getenv("GMAIL_USER", "nexaflow.pro@gmail.com")
+GMAIL_PASS = os.getenv("GMAIL_PASS", "")  # App Password Gmail
+
+def send_email(to_email: str, subject: str, html_body: str):
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = f'NexaFlow <{GMAIL_USER}>'
+    msg['To'] = to_email
+    msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(GMAIL_USER, GMAIL_PASS)
+            server.sendmail(GMAIL_USER, to_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"Email error: {e}")
+        return False
+
+def email_bienvenue(to_email: str, nom: str):
+    html = open('email_templates.html').read()
+    # Extraire le template bienvenue et remplacer les variables
+    send_email(to_email, "Bienvenue sur NexaFlow 🎉", html)
+
+def email_pro_active(to_email: str, nom: str, date_fin: str, reference: str):
+    subject = "⭐ Votre abonnement NexaFlow Pro est activé !"
+    send_email(to_email, subject, "...")
+
+# Endpoints FastAPI
+@app.post("/emails/bienvenue")
+def send_welcome(email: str, nom: str):
+    email_bienvenue(email, nom)
+    return {"sent": True}
+
+@app.post("/emails/pro-active")
+def send_pro_activated(email: str, nom: str, date_fin: str, reference: str):
+    email_pro_active(email, nom, date_fin, reference)
+    return {"sent": True}
+
+# Cron job : vérifier les expirations tous les jours
+# Ajouter dans requirements.txt : apscheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+scheduler = AsyncIOScheduler()
+
+@scheduler.scheduled_job('cron', hour=9)  # Tous les jours à 9h
+async def check_expirations():
+    dans_5_jours = (datetime.now() + timedelta(days=5)).date().isoformat()
+    plans = supabase.table("saas_plans")\\
+        .select("user_email, date_fin")\\
+        .eq("actif", True)\\
+        .eq("date_fin", dans_5_jours)\\
+        .execute()
+    for plan in plans.data:
+        send_email(plan['user_email'],
+                   "⏰ Votre NexaFlow Pro expire dans 5 jours",
+                   "...")  # Template rappel
+
+scheduler.start()
+
+==============================================
+VARIABLES D'ENVIRONNEMENT À AJOUTER SUR HF
+==============================================
+GMAIL_USER = nexaflow.pro@gmail.com
+GMAIL_PASS = (mot de passe d'application Gmail)
+
+Pour créer un mot de passe d'application Gmail :
+1. myaccount.google.com > Sécurité
+2. Validation en 2 étapes > Mots de passe des applications
+3. Choisir "Autre" > "NexaFlow"
+4. Copier le mot de passe généré
+*/
+</script>
+</body>
+</html>
