@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaFlow — Gestion Commerciale</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#08090e;--s1:#0e1018;--s2:#13151f;--s3:#181b27;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);
+  --blue:#4f8ef7;--blue-dim:rgba(79,142,247,.12);
+  --green:#22c55e;--green-dim:rgba(34,197,94,.12);
+  --red:#f43f5e;--red-dim:rgba(244,63,94,.12);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,.12);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,.12);
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#475569;
+  --sidebar:256px;--r:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);display:flex;flex-direction:column;min-height:100vh;font-size:14px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── BARRE PUB ── */
+#adBar{
+  background:linear-gradient(90deg,#1a1400,#1e1700);
+  border-bottom:1px solid rgba(251,191,36,.2);
+  padding:7px 20px;
+  display:flex;align-items:center;gap:12px;
+  font-size:12px;min-height:38px;
+  transition:all .3s;
+}
+#adBar.hidden{display:none}
+.ad-label{background:rgba(251,191,36,.2);color:var(--amber);padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;flex-shrink:0}
+#adText{color:rgba(255,255,255,.7);flex:1;cursor:pointer;transition:opacity .3s}
+#adText:hover{opacity:.8;text-decoration:underline}
+.ad-upgrade{background:var(--blue);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.ad-upgrade:hover{filter:brightness(1.1)}
+.ad-close{color:var(--t3);cursor:pointer;font-size:16px;flex-shrink:0;background:none;border:none;padding:0 4px}
+.ad-close:hover{color:var(--t1)}
+
+/* ── APP LAYOUT ── */
+.app{display:flex;flex:1}
+.sidebar{width:var(--sidebar);min-height:calc(100vh - 38px);background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:38px;left:0;z-index:200;transition:top .3s}
+.sidebar.no-ad{top:0}
+.logo{padding:20px 18px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.logo-mark{width:34px;height:34px;background:linear-gradient(135deg,#4f8ef7,#22d3ee);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:17px;color:#fff;box-shadow:0 0 18px rgba(79,142,247,.35);flex-shrink:0}
+.logo-name{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:17px;background:linear-gradient(90deg,#f1f5f9,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);padding:14px 10px 5px;font-weight:600}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 11px;cursor:pointer;border-radius:8px;color:var(--t2);font-size:13px;font-weight:500;transition:all .15s;position:relative;margin-bottom:1px;user-select:none}
+.ni:hover{background:var(--s2);color:var(--t1)}
+.ni.active{background:var(--blue-dim);color:var(--blue)}
+.ni.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.ni svg{width:15px;height:15px;flex-shrink:0;opacity:.75}
+.ni.active svg,.ni:hover svg{opacity:1}
+.nb{margin-left:auto;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700}
+.nb-b{background:var(--blue-dim);color:var(--blue)}.nb-r{background:var(--red-dim);color:var(--red)}.nb-a{background:var(--amber-dim);color:var(--amber)}
+.ng{cursor:pointer;display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;color:var(--t2);font-size:13px;font-weight:500;transition:all .15s;user-select:none}
+.ng:hover{background:var(--s2);color:var(--t1)}
+.ng-arr{margin-left:auto;width:13px;height:13px;transition:transform .2s}
+.ng.open .ng-arr{transform:rotate(90deg)}
+.nsub{overflow:hidden;max-height:0;transition:max-height .28s ease}
+.nsub.open{max-height:280px}
+.nsub .ni{padding-left:34px;font-size:12.5px}
+
+/* Plan badge sidebar */
+.plan-badge-sidebar{margin:0 10px 10px;border-radius:8px;padding:10px 12px;cursor:pointer}
+.plan-badge-sidebar.free{background:var(--amber-dim);border:1px solid rgba(251,191,36,.2)}
+.plan-badge-sidebar.pro{background:var(--blue-dim);border:1px solid rgba(79,142,247,.2)}
+.pbs-title{font-size:11px;font-weight:700;margin-bottom:2px}
+.pbs-title.free{color:var(--amber)}.pbs-title.pro{color:var(--blue)}
+.pbs-desc{font-size:11px;color:var(--t2)}
+.pbs-link{font-size:11px;margin-top:4px}
+.pbs-link.free{color:var(--blue)}.pbs-link.pro{color:var(--green)}
+
+.su{padding:12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px;cursor:pointer}
+.su:hover{background:var(--s2)}
+.ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;margin-top:38px;transition:margin-top .3s}
+.main.no-ad{margin-top:0}
+.topbar{height:56px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 24px;position:sticky;top:0;z-index:100}
+.bc{flex:1;font-size:13px;color:var(--t2)}
+.bc b{color:var(--t1)}
+.srch{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 11px;width:240px;transition:border-color .2s;position:relative}
+.srch:focus-within{border-color:var(--blue)}
+.srch input{background:none;border:none;outline:none;color:var(--t1);font-family:inherit;font-size:13px;width:100%}
+.srch input::placeholder{color:var(--t3)}
+.srch-res{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--s2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:400;max-height:320px;overflow-y:auto;display:none}
+.srch-res.open{display:block}
+.sr-item{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s}
+.sr-item:last-child{border-bottom:none}
+.sr-item:hover{background:rgba(255,255,255,.03)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all .15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 0 14px rgba(79,142,247,.3)}
+.btn-primary:hover{box-shadow:0 0 22px rgba(79,142,247,.5)}
+.btn-ghost{background:var(--s2);color:var(--t1);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2)}
+.btn-success{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,63,94,.2)}
+.btn-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,.2)}
+.btn-purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 9px;font-size:11px}
+
+/* PAGES */
+.page{display:none;padding:26px;animation:fi .22s ease}
+.page.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:14px}
+.pt{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:22px}
+.ps{color:var(--t2);font-size:13px;margin-top:2px}
+.pa{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* KPI */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default}
+.kpi:hover{border-color:var(--border2);transform:translateY(-2px)}
+.kpi::before{content:'';position:absolute;top:-10px;right:-10px;width:70px;height:70px;border-radius:50%;filter:blur(35px);opacity:.4}
+.kpi.bl::before{background:var(--blue)}.kpi.gr::before{background:var(--green)}.kpi.rd::before{background:var(--red)}.kpi.am::before{background:var(--amber)}
+.ki{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:10px}
+.ki.bl{background:var(--blue-dim)}.ki.gr{background:var(--green-dim)}.ki.rd{background:var(--red-dim)}.ki.am{background:var(--amber-dim)}
+.kv{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:22px;line-height:1;margin-bottom:5px}
+.kv.bl{color:var(--blue)}.kv.gr{color:var(--green)}.kv.rd{color:var(--red)}.kv.am{color:var(--amber)}
+.kl{font-size:12px;color:var(--t2)}
+
+/* TABLE */
+.tw{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.ttb{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ts{display:flex;align-items:center;gap:7px;background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:6px 11px}
+.ts input{background:none;border:none;outline:none;color:var(--t1);font-family:inherit;font-size:13px;width:180px}
+.ts input::placeholder{color:var(--t3)}
+.mla{margin-left:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+td{padding:11px 14px;font-size:13px;vertical-align:middle}
+.ac{display:flex;align-items:center;gap:9px}
+.ma{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.ra{display:flex;gap:3px;justify-content:flex-end}
+.ab{width:26px;height:26px;border-radius:6px;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .15s;color:var(--t2)}
+.ab:hover{border-color:var(--border2);background:var(--s2);color:var(--t1)}
+.pg{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)}
+.pgi{font-size:12px;color:var(--t3)}
+
+/* STATUS BADGES */
+.sb{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.sb::before{content:'';width:5px;height:5px;border-radius:50%}
+.s-pay{background:var(--green-dim);color:var(--green)}.s-pay::before{background:var(--green)}
+.s-att{background:var(--amber-dim);color:var(--amber)}.s-att::before{background:var(--amber)}
+.s-ret{background:var(--red-dim);color:var(--red)}.s-ret::before{background:var(--red)}
+.s-bro{background:var(--s3);color:var(--t3)}.s-bro::before{background:var(--t3)}
+.s-act{background:var(--green-dim);color:var(--green)}.s-act::before{background:var(--green)}
+.s-env{background:var(--blue-dim);color:var(--blue)}.s-env::before{background:var(--blue)}
+.s-pro{background:var(--purple-dim);color:var(--purple)}.s-pro::before{background:var(--purple)}
+.s-ann{background:var(--s3);color:var(--t3)}.s-ann::before{background:var(--t3)}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.mo.open{display:flex}
+.md{background:var(--s2);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;animation:mi .2s ease;box-shadow:0 24px 80px rgba(0,0,0,.65)}
+.md.lg{max-width:820px}.md.xl{max-width:960px}
+@keyframes mi{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+.mh{padding:20px 22px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--s2);z-index:1}
+.mt{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:17px;flex:1}
+.mc{width:28px;height:28px;border-radius:7px;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);font-size:16px}
+.mc:hover{color:var(--t1)}
+.mb{padding:22px}
+.mf{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.fg.f1{grid-template-columns:1fr}
+.fm{display:flex;flex-direction:column;gap:5px}
+.fm.s2{grid-column:span 2}
+label{font-size:12px;font-weight:600;color:var(--t2)}
+input,select,textarea{background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--t1);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+select option{background:var(--s2)}
+textarea{resize:vertical;min-height:70px}
+
+/* INVOICE LINES */
+.ilt{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:11px}
+.ilh{display:grid;grid-template-columns:1fr 65px 105px 95px 26px;gap:6px;padding:8px 11px;background:var(--s3);font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase}
+.il{display:grid;grid-template-columns:1fr 65px 105px 95px 26px;gap:6px;padding:7px 11px;border-top:1px solid var(--border);align-items:center}
+.il input{padding:5px 7px;font-size:12px}
+.tot{padding:13px 11px;border-top:2px solid var(--border2);display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.tr{display:flex;gap:18px;font-size:13px;align-items:center}
+.tr.grand{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px}
+.tl{min-width:110px;text-align:right;color:var(--t2)}
+.tv{min-width:100px;text-align:right}
+
+/* STOCK */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.sc{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:border-color .2s,transform .2s}
+.sc:hover{border-color:var(--border2);transform:translateY(-2px)}
+.sth{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--s3)}
+.pb{height:5px;background:var(--s3);border-radius:3px;overflow:hidden;margin-top:7px}
+.pf{height:100%;border-radius:3px}
+
+/* SETTINGS */
+.ssg{display:grid;grid-template-columns:200px 1fr;gap:20px}
+.ssn{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:7px;height:fit-content}
+.ssi{padding:8px 11px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--t2);transition:all .15s;display:flex;align-items:center;gap:8px;margin-bottom:1px}
+.ssi:hover{background:var(--s3);color:var(--t1)}
+.ssi.active{background:var(--blue-dim);color:var(--blue)}
+.ssp{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:24px}
+.trow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.trow:last-child{border-bottom:none}
+.tinfo{flex:1}
+.tlabel{font-size:13px;font-weight:600}
+.tdesc{font-size:12px;color:var(--t3);margin-top:1px}
+.tog{width:38px;height:21px;border-radius:11px;background:var(--s3);border:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--blue);border-color:var(--blue)}
+.tog::after{content:'';width:15px;height:15px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tog.on::after{transform:translateX(17px)}
+
+/* UPGRADE MODAL */
+.upgrade-box{text-align:center}
+.upgrade-icon{font-size:52px;margin-bottom:16px}
+.upgrade-title{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:24px;margin-bottom:8px}
+.upgrade-desc{color:var(--t2);font-size:14px;margin-bottom:24px;line-height:1.6}
+.upgrade-price{background:var(--blue-dim);border:1px solid rgba(79,142,247,.2);border-radius:12px;padding:16px;margin-bottom:20px}
+.upgrade-price-num{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:32px;color:var(--blue)}
+.upgrade-price-label{font-size:12px;color:var(--t2);margin-top:4px}
+.payment-steps{display:flex;flex-direction:column;gap:10px;text-align:left;margin-bottom:20px}
+.ps-step{display:flex;align-items:flex-start;gap:10px;background:var(--s3);border-radius:9px;padding:12px}
+.ps-num{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.ps-text{font-size:13px;color:var(--t2);line-height:1.5}
+.ps-text strong{color:var(--t1)}
+.baridimob-btn{width:100%;padding:13px;background:linear-gradient(135deg,#00a651,#007a3d);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 16px rgba(0,166,81,.3);transition:all .18s;margin-bottom:10px}
+.baridimob-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,166,81,.4)}
+
+/* QICK OPT */
+.qopt{display:flex;align-items:center;gap:13px;padding:13px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s}
+.qopt:hover{border-color:var(--blue)}
+.qico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* TOAST */
+.tw-wrap{position:fixed;bottom:22px;right:22px;z-index:10000;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:11px 16px;font-size:13px;min-width:270px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 30px rgba(0,0,0,.45);animation:tin .25s ease;font-weight:500}
+.toast.success{border-left:3px solid var(--green)}.toast.error{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--blue)}
+@keyframes tin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.spin{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--t2)}
+.empty{padding:50px 20px;text-align:center}
+.empty-ico{font-size:36px;margin-bottom:14px;opacity:.35}
+.empty-t{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:17px;margin-bottom:7px}
+.empty-s{font-size:13px;color:var(--t2);margin-bottom:18px}
+
+/* MODELES */
+.mc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.mc-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s}
+.mc-card:hover{border-color:var(--blue);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.mc-preview{height:100px;display:flex;align-items:center;justify-content:center;font-size:32px;border-bottom:1px solid var(--border)}
+.mc-body{padding:12px}
+.mc-title{font-weight:700;font-size:13px;margin-bottom:4px}
+.mc-desc{font-size:12px;color:var(--t2);margin-bottom:10px}
+.mc-tags{display:flex;gap:4px;flex-wrap:wrap}
+.mc-tag{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;background:var(--blue-dim);color:var(--blue)}
+
+@media(max-width:1100px){.kgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* ══ AUTH SCREEN ══ */
+#authScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#060810 0%,#0a0f20 50%,#060c18 100%)}
+#authScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(79,142,247,.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(34,211,238,.08) 0%,transparent 50%)}
+.auth-wrap{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:1000px;min-height:580px;background:var(--s1);border:1px solid var(--border2);border-radius:20px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.7)}
+.auth-left{background:linear-gradient(135deg,#141d3a,#0a0f1e);padding:44px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.auth-left::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:rgba(79,142,247,.1);filter:blur(60px)}
+.auth-logo{display:flex;align-items:center;gap:11px;margin-bottom:44px}
+.auth-logo-mark{width:42px;height:42px;background:linear-gradient(135deg,#4f8ef7,#22d3ee);border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;box-shadow:0 0 20px rgba(79,142,247,.4)}
+.auth-logo-name{font-weight:800;font-size:20px;color:#fff}
+.auth-logo-sub{font-size:10px;color:var(--t3);margin-top:-2px}
+.auth-tagline{font-size:30px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:14px}
+.auth-tagline span{background:linear-gradient(90deg,#6b9fff,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.auth-desc{font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:32px}
+.auth-steps{display:flex;flex-direction:column;gap:12px}
+.auth-step{display:flex;align-items:center;gap:11px}
+.auth-step-ico{width:30px;height:30px;border-radius:7px;background:rgba(79,142,247,.18);border:1px solid rgba(79,142,247,.25);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.auth-step-txt{font-size:13px;color:var(--t2)}
+.auth-step-txt strong{color:var(--t1)}
+.auth-right{padding:44px;display:flex;flex-direction:column;justify-content:center;background:var(--s1)}
+.auth-form-title{font-weight:800;font-size:24px;margin-bottom:5px}
+.auth-form-sub{color:var(--t2);font-size:13px;margin-bottom:28px}
+.google-btn{width:100%;padding:12px 18px;background:#fff;color:#1f2937;border:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:11px;transition:all .18s;margin-bottom:18px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.google-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.auth-divider{display:flex;align-items:center;gap:11px;margin-bottom:16px;color:var(--t3);font-size:12px}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.af{display:flex;flex-direction:column;gap:11px;margin-bottom:14px}
+.af-field label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px}
+.af-field input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--t1);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s}
+.af-field input:focus{border-color:var(--blue)}
+.auth-submit{width:100%;padding:12px;background:linear-gradient(135deg,#4f8ef7,#6b9fff);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;box-shadow:0 4px 16px rgba(79,142,247,.35)}
+.auth-submit:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(79,142,247,.5)}
+.auth-switch{text-align:center;font-size:13px;color:var(--t2);margin-top:12px}
+.auth-switch a{color:var(--blue);text-decoration:none;font-weight:600}
+.auth-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;display:none}
+.demo-btn{width:100%;padding:8px;margin-top:8px;background:transparent;border:1px solid var(--border);color:var(--t3);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;transition:all .18s}
+.demo-btn:hover{border-color:var(--border2);color:var(--t2)}
+/* Pubs réelles dans dashboard */
+.pub-real-card{border-radius:10px;overflow:hidden;cursor:pointer;margin-bottom:10px;transition:transform .2s}
+.pub-real-card:hover{transform:scale(1.01)}
+.pub-mobilis{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);padding:14px;display:flex;align-items:center;gap:10px}
+.pub-djezzy{background:linear-gradient(135deg,#1a0a1e,#2d0a3a);border:1px solid rgba(255,50,100,.3);padding:14px;display:flex;align-items:center;gap:10px}
+.pub-aat{background:linear-gradient(135deg,#fff3e0,#ffe0b2);padding:14px;display:flex;align-items:center;gap:10px}
+.pub-cpa{background:linear-gradient(135deg,#e3f2fd,#bbdefb);padding:14px;display:flex;align-items:center;gap:10px}
+.pub-ico{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.pub-title{font-weight:700;font-size:13px}
+.pub-desc{font-size:11px;opacity:.75;margin-top:1px}
+.pub-tag{font-size:9px;padding:1px 5px;border-radius:3px;margin-top:3px;display:inline-block;font-weight:600;opacity:.7}
+</style>
+</head>
+<body>
+
+<!-- ── BARRE PUB (plan gratuit) ── -->
+<div id="adBar" style="display:none">
+  <span class="ad-label">PUB</span>
+  <span id="adText" onclick="clicPub()">Chargement…</span>
+  <button class="ad-upgrade" onclick="openModal('moUpgrade')">⭐ Passer Pro — Sans pub</button>
+  <button class="ad-close" onclick="closeAdBar()">×</button>
+</div>
+
+<!-- ── APP ── -->
+<div class="app" id="mainApp" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-mark">N</div>
+      <div><div class="logo-name">NexaFlow</div><div style="font-size:10px;color:var(--t3)">Gestion Commerciale</div></div>
+    </div>
+    <nav class="nav">
+      <div class="ni active" onclick="goPage('dashboard',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </div>
+      <div class="nav-lbl">Commercial</div>
+      <div class="ni" onclick="goPage('clients',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Clients <span class="nb nb-b" id="nbClients">—</span>
+      </div>
+      <div class="ng open" onclick="toggleG(this)">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/></svg>
+        Facturation
+        <svg class="ng-arr" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="nsub open">
+        <div class="ni" onclick="goPage('factures',this)">Factures <span class="nb nb-a" id="nbFac">—</span></div>
+        <div class="ni" onclick="goPage('devis',this)">Devis <span class="nb nb-b" id="nbDev">—</span></div>
+      </div>
+      <div class="ng" onclick="toggleG(this)">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
+        Stock
+        <svg class="ng-arr" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="nsub">
+        <div class="ni" onclick="goPage('stock',this)">Produits & Stock</div>
+      </div>
+      <div class="nav-lbl">Avancé</div>
+      <div class="ni" onclick="goPage('modeles',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Modèles factures
+      </div>
+      <div class="nav-lbl">Finances</div>
+      <div class="ni" onclick="goPage('tresorerie',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Trésorerie
+      </div>
+      <div class="nav-lbl">Système</div>
+      <div class="ni" onclick="goPage('parametres',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Paramètres
+      </div>
+    </nav>
+
+    <!-- Badge plan sidebar -->
+    <div id="planBadgeSidebar" class="plan-badge-sidebar free" onclick="openModal('moUpgrade')">
+      <div class="pbs-title free" id="pbsTitle">⚡ Plan Gratuit</div>
+      <div class="pbs-desc" id="pbsDesc">Publicités activées</div>
+      <div class="pbs-link free" id="pbsLink">Passer au Pro →</div>
+    </div>
+
+    <div class="su" onclick="toggleUserMenu()">
+      <div class="ava" id="userAva">U</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="userName">Utilisateur</div>
+        <div style="font-size:11px;color:var(--t3)" id="userEmail">—</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main" id="mainWrap">
+    <header class="topbar">
+      <div class="bc"><b id="breadcrumb">Tableau de bord</b></div>
+      <div class="srch" id="srchBox">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input placeholder="Rechercher…" id="srchInput" oninput="globalSearch(this.value)" autocomplete="off">
+        <div class="srch-res" id="srchRes"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="openModal('moNew')">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Nouveau
+        </button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="ph">
+        <div><div class="pt">Bonjour 👋</div><div class="ps" id="dashSub">Chargement…</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('moFac')">+ Nouvelle facture</button>
+      </div>
+      <div id="calAlert" style="display:none;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:9px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--t2)">
+        ⚙️ <strong style="color:var(--amber)">Configuration requise</strong> — Allez dans <a href="#" onclick="goPage('parametres',null)" style="color:var(--blue)">Paramètres</a> et entrez votre URL + clé Supabase.
+      </div>
+      <div class="kgrid" id="dashKpis">
+        <div class="kpi bl"><div class="ki bl">💰</div><div class="kv bl" style="height:28px;background:var(--s3);border-radius:4px;width:130px"></div><div class="kl" style="margin-top:6px">CA encaissé</div></div>
+        <div class="kpi gr"><div class="ki gr">✅</div><div class="kv gr" style="height:28px;background:var(--s3);border-radius:4px;width:80px"></div><div class="kl" style="margin-top:6px">Factures payées</div></div>
+        <div class="kpi rd"><div class="ki rd">⏰</div><div class="kv rd" style="height:28px;background:var(--s3);border-radius:4px;width:120px"></div><div class="kl" style="margin-top:6px">En attente</div></div>
+        <div class="kpi am"><div class="ki am">📋</div><div class="kv am" style="height:28px;background:var(--s3);border-radius:4px;width:50px"></div><div class="kl" style="margin-top:6px">Devis ouverts</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="tw"><div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:14px;flex:1">Dernières Factures</span><button class="btn btn-ghost btn-xs" onclick="goPage('factures',null)">Voir tout →</button></div><div id="dashFac"><div class="loading"><div class="spin"></div></div></div></div>
+        <div class="tw"><div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:14px;flex:1">Derniers Clients</span><button class="btn btn-ghost btn-xs" onclick="goPage('clients',null)">Voir tout →</button></div><div id="dashCli"><div class="loading"><div class="spin"></div></div></div></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="ph">
+        <div><div class="pt">Clients</div><div class="ps" id="cliSub">Chargement…</div></div>
+        <div class="pa">
+          <button class="btn btn-ghost btn-sm" onclick="exportClientsExcel()">📊 Excel</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportClientsCSV()">📄 CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('moCli')">+ Nouveau client</button>
+        </div>
+      </div>
+      <div class="tw">
+        <div class="ttb">
+          <div class="ts"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input placeholder="Rechercher…" oninput="searchClients(this.value)"></div>
+          <select onchange="filterCliSt(this.value)" style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--t1);font-family:inherit;font-size:12px"><option value="">Tous</option><option value="actif">Actifs</option><option value="prospect">Prospects</option><option value="inactif">Inactifs</option></select>
+          <div class="mla" style="font-size:12px;color:var(--t3)" id="cliCount"></div>
+        </div>
+        <table><thead><tr><th>Entreprise</th><th>Contact</th><th>Ville</th><th>Statut</th><th>Depuis</th><th></th></tr></thead>
+        <tbody id="cliTbl"><tr><td colspan="6"><div class="loading"><div class="spin"></div></div></td></tr></tbody></table>
+        <div class="pg"><div class="pgi" id="cliPgInfo">—</div><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-xs" onclick="cliPg(-1)">← Préc.</button><button class="btn btn-ghost btn-xs" onclick="cliPg(1)">Suiv. →</button></div></div>
+      </div>
+    </div>
+
+    <!-- FACTURES -->
+    <div class="page" id="page-factures">
+      <div class="ph">
+        <div><div class="pt">Factures</div><div class="ps" id="facSub">Chargement…</div></div>
+        <div class="pa">
+          <button class="btn btn-ghost btn-sm" onclick="exportFacturesExcel()">📊 Excel</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('moFac')">+ Nouvelle facture</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer" onclick="filterFacSt('')"><div style="font-size:10px;color:var(--t3);margin-bottom:3px">TOUTES</div><div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:20px" id="fcAll">—</div></div>
+        <div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px;cursor:pointer" onclick="filterFacSt('payee')"><div style="font-size:10px;color:var(--green);margin-bottom:3px">PAYÉES</div><div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--green)" id="fcPay">—</div></div>
+        <div style="background:var(--amber-dim);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:12px;cursor:pointer" onclick="filterFacSt('envoyee')"><div style="font-size:10px;color:var(--amber);margin-bottom:3px">EN ATTENTE</div><div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--amber)" id="fcAtt">—</div></div>
+        <div style="background:var(--red-dim);border:1px solid rgba(244,63,94,.2);border-radius:8px;padding:12px;cursor:pointer" onclick="filterFacSt('en_retard')"><div style="font-size:10px;color:var(--red);margin-bottom:3px">EN RETARD</div><div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--red)" id="fcRet">—</div></div>
+      </div>
+      <div class="tw">
+        <div class="ttb"><div class="ts"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input placeholder="N° facture, client…" oninput="searchFac(this.value)"></div></div>
+        <table><thead><tr><th>N° Facture</th><th>Client</th><th>Date</th><th>Échéance</th><th>Montant TTC</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="facTbl"><tr><td colspan="7"><div class="loading"><div class="spin"></div></td></tr></tbody></table>
+        <div class="pg"><div class="pgi" id="facPgInfo">—</div><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-xs" onclick="facPg(-1)">← Préc.</button><button class="btn btn-ghost btn-xs" onclick="facPg(1)">Suiv. →</button></div></div>
+      </div>
+    </div>
+
+    <!-- DEVIS -->
+    <div class="page" id="page-devis">
+      <div class="ph"><div><div class="pt">Devis</div><div class="ps">Propositions commerciales</div></div><div class="pa"><button class="btn btn-ghost btn-sm" onclick="exportDevisExcel()">📊 Excel</button><button class="btn btn-primary btn-sm" onclick="openModal('moDev')">+ Nouveau devis</button></div></div>
+      <div class="tw"><table><thead><tr><th>N° Devis</th><th>Client</th><th>Objet</th><th>Date</th><th>Montant TTC</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="devTbl"><tr><td colspan="7"><div class="loading"><div class="spin"></div></td></tr></tbody></table></div>
+    </div>
+
+    <!-- STOCK -->
+    <div class="page" id="page-stock">
+      <div class="ph"><div><div class="pt">Produits & Stock</div><div class="ps" id="stSub">Chargement…</div></div><div class="pa"><button class="btn btn-ghost btn-sm" onclick="exportStockExcel()">📊 Excel</button><button class="btn btn-amber btn-sm" onclick="loadStock(true)">⚠️ Alertes</button><button class="btn btn-primary btn-sm" onclick="openModal('moProd')">+ Nouveau produit</button></div></div>
+      <div class="sgrid" id="stGrid"><div style="grid-column:span 3"><div class="loading"><div class="spin"></div></div></div></div>
+    </div>
+
+    <!-- MODÈLES -->
+    <div class="page" id="page-modeles">
+      <div class="ph"><div><div class="pt">Modèles de Factures</div><div class="ps">Personnalisez selon votre activité</div></div><button class="btn btn-primary btn-sm" onclick="openModal('moNewModele')">+ Nouveau modèle</button></div>
+      <div class="mc-grid" id="modelesGrid"></div>
+    </div>
+
+    <!-- TRÉSORERIE -->
+    <div class="page" id="page-tresorerie">
+      <div class="ph"><div><div class="pt">Trésorerie</div><div class="ps">Flux financiers</div></div><button class="btn btn-ghost btn-sm" onclick="exportTresoExcel()">📊 Excel</button></div>
+      <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi gr"><div class="ki gr">🏦</div><div class="kv gr" id="tSolde">—</div><div class="kl">Solde net</div></div>
+        <div class="kpi bl"><div class="ki bl">📈</div><div class="kv bl" id="tEnt">—</div><div class="kl">Entrées</div></div>
+        <div class="kpi rd"><div class="ki rd">📉</div><div class="kv rd" id="tSor">—</div><div class="kl">Sorties</div></div>
+      </div>
+      <div class="tw"><div style="padding:14px 18px;border-bottom:1px solid var(--border);font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:14px">Mouvements</div>
+        <table><thead><tr><th>Date</th><th>Description</th><th>Référence</th><th>Type</th><th>Montant</th></tr></thead><tbody id="tresoTbl"><tr><td colspan="5"><div class="loading"><div class="spin"></div></td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- PARAMÈTRES -->
+    <div class="page" id="page-parametres">
+      <div class="ph"><div><div class="pt">Paramètres</div><div class="ps">Configuration & Connexion</div></div></div>
+      <div class="ssg">
+        <div class="ssn">
+          <div class="ssi active" onclick="sstab(this,'ssConn')">🔗 Connexion</div>
+          <div class="ssi" onclick="sstab(this,'ssEnt')">🏢 Entreprise</div>
+          <div class="ssi" onclick="sstab(this,'ssBanque')">🏦 Banque</div>
+          <div class="ssi" onclick="sstab(this,'ssNotif')">🔔 Notifications</div>
+          <div class="ssi" onclick="sstab(this,'ssPlan')">💎 Mon Plan</div>
+        </div>
+        <div>
+          <!-- Connexion -->
+          <div class="ssp" id="ssConn">
+            <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px">Connexion Supabase</div>
+            <div class="fm" style="margin-bottom:12px"><label>URL Supabase</label><input type="text" id="cfgUrl" placeholder="https://XXXX.supabase.co" oninput="saveConfig()"></div>
+            <div class="fm" style="margin-bottom:12px"><label>Anon Key</label><input type="text" id="cfgKey" placeholder="eyJhbGci…" oninput="saveConfig()"></div>
+            <div class="fm" style="margin-bottom:16px"><label>URL Backend HF (pour Excel pro)</label><input type="text" id="cfgBackend" placeholder="https://user-nexaflow-backend.hf.space" oninput="saveConfig()"></div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="testConn()">🔌 Tester</button>
+              <button class="btn btn-success" onclick="initDemo()">🎲 Données démo</button>
+            </div>
+            <div id="connSt" style="margin-top:12px;font-size:13px;color:var(--t2)"></div>
+          </div>
+          <!-- Entreprise -->
+          <div class="ssp" id="ssEnt" style="display:none">
+            <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px">Informations entreprise</div>
+            <div class="fg" style="margin-bottom:14px">
+              <div class="fm s2"><label>Raison sociale</label><input type="text" id="eRs"></div>
+              <div class="fm"><label>N° RC</label><input type="text" id="eRc"></div>
+              <div class="fm"><label>N° NIF</label><input type="text" id="eNif"></div>
+              <div class="fm"><label>N° NIS</label><input type="text" id="eNis"></div>
+              <div class="fm"><label>Activité</label><input type="text" id="eAct"></div>
+              <div class="fm"><label>Téléphone</label><input type="text" id="eTel"></div>
+              <div class="fm"><label>Email</label><input type="email" id="eEmail"></div>
+              <div class="fm s2"><label>Adresse</label><input type="text" id="eAdr"></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveEntreprise()">💾 Enregistrer</button>
+          </div>
+          <!-- Banque -->
+          <div class="ssp" id="ssBanque" style="display:none">
+            <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px">Informations bancaires</div>
+            <div class="fg" style="margin-bottom:14px">
+              <div class="fm s2"><label>Nom de la banque</label><input type="text" id="bNom" placeholder="Ex: Banque d'Ain el turk"></div>
+              <div class="fm s2"><label>RIB</label><input type="text" id="bRib" placeholder="00799999300102982365"></div>
+              <div class="fm"><label>Numéro de compte</label><input type="text" id="bCompte"></div>
+              <div class="fm"><label>Code banque</label><input type="text" id="bCode" placeholder="007"></div>
+              <div class="fm"><label>Code agence</label><input type="text" id="bAgence"></div>
+              <div class="fm"><label>CCP</label><input type="text" id="bCcp" placeholder="123456789"></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveBanque()">💾 Enregistrer</button>
+          </div>
+          <!-- Notifications -->
+          <div class="ssp" id="ssNotif" style="display:none">
+            <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px">Notifications</div>
+            <div class="trow"><div class="tinfo"><div class="tlabel">Factures en retard</div><div class="tdesc">Alerte quand une échéance est dépassée</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="trow"><div class="tinfo"><div class="tlabel">Stock faible</div><div class="tdesc">Alerte sous le seuil minimum</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="trow"><div class="tinfo"><div class="tlabel">Paiement reçu</div><div class="tdesc">Notification à chaque encaissement</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <!-- Mon Plan -->
+          <div class="ssp" id="ssPlan" style="display:none">
+            <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px">Mon Plan</div>
+            <div id="planDetails" style="margin-bottom:20px"></div>
+            <button class="btn btn-primary" onclick="openModal('moUpgrade')">⭐ Passer au Plan Pro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- UPGRADE -->
+<div class="mo" id="moUpgrade">
+  <div class="md" style="max-width:480px">
+    <div class="mh"><div class="mt">💎 Passer au Plan Pro</div><div class="mc" onclick="closeModal('moUpgrade')">✕</div></div>
+    <div class="mb">
+      <div class="upgrade-box">
+        <div class="upgrade-icon">⭐</div>
+        <div class="upgrade-title">NexaFlow Pro</div>
+        <div class="upgrade-desc">Supprimez les publicités et accédez à toutes les fonctionnalités avancées.</div>
+        <div class="upgrade-price">
+          <div class="upgrade-price-num">990 DA</div>
+          <div class="upgrade-price-label">par mois · Annulable à tout moment</div>
+        </div>
+        <div style="background:var(--blue-dim);border-radius:8px;padding:12px;margin-bottom:20px;font-size:13px;color:var(--t2);text-align:left">
+          ✅ Zéro publicité &nbsp;·&nbsp; ✅ Excel professionnel &nbsp;·&nbsp; ✅ Tous les modèles &nbsp;·&nbsp; ✅ Support prioritaire
+        </div>
+        <div class="payment-steps">
+          <div class="ps-step"><div class="ps-num">1</div><div class="ps-text">Envoyez <strong>990 DA</strong> via BaridiMob ou CCP au numéro :<br><strong style="font-size:14px;color:var(--green)">CCP : <span id="ccpNum">123456789</span> / Clé <span id="ccpCle">78</span></strong></div></div>
+          <div class="ps-step"><div class="ps-num">2</div><div class="ps-text">Notez la <strong>référence du virement</strong> ou prenez une capture d'écran</div></div>
+          <div class="ps-step"><div class="ps-num">3</div><div class="ps-text">Envoyez la preuve à <strong id="emailPaie">nexaflow.pro@gmail.com</strong></div></div>
+          <div class="ps-step"><div class="ps-num">4</div><div class="ps-text">Activation dans les <strong>2 heures</strong> ✅</div></div>
+        </div>
+        <button class="baridimob-btn" onclick="copyPayInfo()">📋 Copier les infos de paiement</button>
+        <button style="background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer;font-family:inherit" onclick="closeModal('moUpgrade')">Continuer avec les pubs</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOUVEAU CLIENT -->
+<div class="mo" id="moCli"><div class="md"><div class="mh"><div class="mt">👤 Nouveau client</div><div class="mc" onclick="closeModal('moCli')">✕</div></div><div class="mb"><div class="fg"><div class="fm s2"><label>Raison sociale *</label><input type="text" id="c_rs"></div><div class="fm"><label>N° RC</label><input type="text" id="c_rc"></div><div class="fm"><label>N° NIF</label><input type="text" id="c_nif"></div><div class="fm"><label>N° NIS</label><input type="text" id="c_nis"></div><div class="fm"><label>Activité</label><input type="text" id="c_act"></div><div class="fm"><label>Contact</label><input type="text" id="c_nom"></div><div class="fm"><label>Téléphone</label><input type="text" id="c_tel"></div><div class="fm"><label>Email</label><input type="email" id="c_email"></div><div class="fm"><label>Ville</label><select id="c_ville"><option>Oran</option><option>Alger</option><option>Constantine</option><option>Annaba</option><option>Béjaïa</option><option>Sétif</option><option>Tlemcen</option><option>Autre</option></select></div><div class="fm"><label>Statut</label><select id="c_st"><option value="actif">Actif</option><option value="prospect">Prospect</option></select></div><div class="fm s2"><label>Adresse</label><input type="text" id="c_adr"></div><div class="fm s2"><label>Notes</label><textarea id="c_notes"></textarea></div></div></div><div class="mf"><button class="btn btn-ghost" onclick="closeModal('moCli')">Annuler</button><button class="btn btn-primary" onclick="createClient()">✅ Créer</button></div></div></div>
+
+<!-- NOUVELLE FACTURE -->
+<div class="mo" id="moFac"><div class="md lg"><div class="mh"><div class="mt">🧾 Nouvelle facture</div><div class="mc" onclick="closeModal('moFac')">✕</div></div><div class="mb"><div class="fg" style="margin-bottom:14px"><div class="fm"><label>Client *</label><select id="f_cli"><option value="">-- Sélectionner --</option></select></div><div class="fm"><label>Statut</label><select id="f_st"><option value="brouillon">Brouillon</option><option value="envoyee">Envoyée</option></select></div><div class="fm"><label>Date</label><input type="date" id="f_date"></div><div class="fm"><label>Échéance</label><input type="date" id="f_ech"></div><div class="fm s2"><label>Objet</label><input type="text" id="f_obj"></div></div>
+<label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:7px">Lignes</label>
+<div class="ilt"><div class="ilh"><div>Désignation</div><div>Qté</div><div>P.U. HT (DA)</div><div>Total HT</div><div></div></div><div id="fLines"><div class="il"><input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="calcFac()"><input type="number" value="0" min="0" oninput="calcFac()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'fLines','calcFac')" style="cursor:pointer;color:var(--t3);font-size:15px;text-align:center">✕</span></div></div>
+<div class="tot"><div class="tr"><span class="tl">Sous-total HT</span><span class="tv" id="f_ht">0 DA</span></div><div class="tr"><span class="tl">TVA 19%</span><span class="tv" id="f_tva">0 DA</span></div><div class="tr grand"><span class="tl">Total TTC</span><span class="tv" id="f_ttc">0 DA</span></div></div></div>
+<button class="btn btn-ghost btn-sm" onclick="addFacLine()" style="margin-bottom:14px">+ Ajouter ligne</button>
+<div class="fm"><label>Notes</label><textarea id="f_notes"></textarea></div></div><div class="mf"><button class="btn btn-ghost" onclick="closeModal('moFac')">Annuler</button><button class="btn btn-success" onclick="createFacture('brouillon')">💾 Brouillon</button><button class="btn btn-primary" onclick="createFacture('envoyee')">📤 Créer</button></div></div></div>
+
+<!-- NOUVEAU DEVIS -->
+<div class="mo" id="moDev"><div class="md lg"><div class="mh"><div class="mt">📋 Nouveau devis</div><div class="mc" onclick="closeModal('moDev')">✕</div></div><div class="mb"><div class="fg" style="margin-bottom:14px"><div class="fm"><label>Client *</label><select id="d_cli"><option value="">-- Sélectionner --</option></select></div><div class="fm"><label>Date</label><input type="date" id="d_date"></div><div class="fm"><label>Validité</label><input type="date" id="d_val"></div><div class="fm"><label>Statut</label><select id="d_st"><option value="brouillon">Brouillon</option><option value="envoye">Envoyé</option></select></div><div class="fm s2"><label>Objet</label><input type="text" id="d_obj"></div></div>
+<div class="ilt"><div class="ilh"><div>Désignation</div><div>Qté</div><div>P.U. HT (DA)</div><div>Total HT</div><div></div></div><div id="dLines"><div class="il"><input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="calcDev()"><input type="number" value="0" min="0" oninput="calcDev()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'dLines','calcDev')" style="cursor:pointer;color:var(--t3);font-size:15px;text-align:center">✕</span></div></div>
+<div class="tot"><div class="tr"><span class="tl">Sous-total HT</span><span class="tv" id="d_ht">0 DA</span></div><div class="tr"><span class="tl">TVA 19%</span><span class="tv" id="d_tva">0 DA</span></div><div class="tr grand"><span class="tl">Total TTC</span><span class="tv" id="d_ttc">0 DA</span></div></div></div>
+<button class="btn btn-ghost btn-sm" onclick="addDevLine()">+ Ajouter ligne</button></div><div class="mf"><button class="btn btn-ghost" onclick="closeModal('moDev')">Annuler</button><button class="btn btn-primary" onclick="createDevis()">✅ Créer</button></div></div></div>
+
+<!-- NOUVEAU PRODUIT -->
+<div class="mo" id="moProd"><div class="md"><div class="mh"><div class="mt">📦 Nouveau produit</div><div class="mc" onclick="closeModal('moProd')">✕</div></div><div class="mb"><div class="fg"><div class="fm s2"><label>Désignation *</label><input type="text" id="p_des"></div><div class="fm"><label>Référence</label><input type="text" id="p_ref"></div><div class="fm"><label>Unité</label><select id="p_un"><option>unité</option><option>bobine</option><option>lot</option><option>heure</option><option>service</option><option>kg</option><option>m</option></select></div><div class="fm"><label>Prix vente HT (DA)</label><input type="number" id="p_pv" value="0"></div><div class="fm"><label>Prix achat HT (DA)</label><input type="number" id="p_pa" value="0"></div><div class="fm"><label>TVA (%)</label><input type="number" id="p_tva" value="19"></div><div class="fm"><label>Stock actuel</label><input type="number" id="p_st" value="0"></div><div class="fm"><label>Stock min</label><input type="number" id="p_sm" value="5"></div><div class="fm"><label>Stock max</label><input type="number" id="p_sx" value="50"></div></div></div><div class="mf"><button class="btn btn-ghost" onclick="closeModal('moProd')">Annuler</button><button class="btn btn-primary" onclick="createProduit()">✅ Créer</button></div></div></div>
+
+<!-- PAIEMENT -->
+<div class="mo" id="moPay"><div class="md" style="max-width:440px"><div class="mh"><div class="mt">💳 Enregistrer paiement</div><div class="mc" onclick="closeModal('moPay')">✕</div></div><div class="mb"><div class="fg f1" style="gap:12px"><div class="fm"><label>Montant (DA)</label><input type="number" id="pay_mt" placeholder="0"></div><div class="fm"><label>Date paiement</label><input type="date" id="pay_dt"></div><div class="fm"><label>Mode de paiement</label><select id="pay_mode"><option value="virement">Virement bancaire</option><option value="cheque">Chèque</option><option value="especes">Espèces</option><option value="ccp">CCP</option><option value="edahabia">Edahabia</option><option value="baridimob">BaridiMob</option></select></div><div class="fm"><label>Référence</label><input type="text" id="pay_ref"></div></div></div><div class="mf"><button class="btn btn-ghost" onclick="closeModal('moPay')">Annuler</button><button class="btn btn-success" onclick="savePaiement()">✅ Confirmer</button></div></div></div>
+
+<!-- VOIR FACTURE -->
+<div class="mo" id="moViewFac"><div class="md xl"><div class="mh"><div class="mt" id="vfTitle">Facture</div><div style="display:flex;gap:6px;margin-right:8px" id="vfActions"></div><div class="mc" onclick="closeModal('moViewFac')">✕</div></div><div class="mb" id="vfBody"><div class="loading"><div class="spin"></div></div></div></div></div>
+
+<!-- VOIR CLIENT -->
+<div class="mo" id="moViewCli"><div class="md lg"><div class="mh"><div class="mt" id="vcTitle">Client</div><div style="display:flex;gap:6px;margin-right:8px"><button class="btn btn-ghost btn-xs" onclick="editClient(currentClientId)">✏️ Modifier</button></div><div class="mc" onclick="closeModal('moViewCli')">✕</div></div><div class="mb" id="vcBody"><div class="loading"><div class="spin"></div></div></div></div></div>
+
+<!-- ÉDITER CLIENT -->
+<div class="mo" id="moEditCli"><div class="md"><div class="mh"><div class="mt">✏️ Modifier client</div><div class="mc" onclick="closeModal('moEditCli')">✕</div></div><div class="mb"><div class="fg"><div class="fm s2"><label>Raison sociale *</label><input type="text" id="ec_rs"></div><div class="fm"><label>N° RC</label><input type="text" id="ec_rc"></div><div class="fm"><label>N° NIF</label><input type="text" id="ec_nif"></div><div class="fm"><label>N° NIS</label><input type="text" id="ec_nis"></div><div class="fm"><label>Activité</label><input type="text" id="ec_act"></div><div class="fm"><label>Contact</label><input type="text" id="ec_nom"></div><div class="fm"><label>Téléphone</label><input type="text" id="ec_tel"></div><div class="fm"><label>Email</label><input type="email" id="ec_email"></div><div class="fm"><label>Ville</label><select id="ec_ville"><option>Oran</option><option>Alger</option><option>Constantine</option><option>Annaba</option><option>Béjaïa</option><option>Sétif</option><option>Tlemcen</option><option>Autre</option></select></div><div class="fm"><label>Statut</label><select id="ec_st"><option value="actif">Actif</option><option value="prospect">Prospect</option><option value="inactif">Inactif</option></select></div><div class="fm s2"><label>Adresse</label><input type="text" id="ec_adr"></div><div class="fm s2"><label>Notes</label><textarea id="ec_notes"></textarea></div></div></div><div class="mf"><button class="btn btn-ghost" onclick="closeModal('moEditCli')">Annuler</button><button class="btn btn-primary" onclick="saveEditClient()">💾 Enregistrer</button></div></div></div>
+
+<!-- ÉDITER FACTURE -->
+<div class="mo" id="moEditFac"><div class="md lg"><div class="mh"><div class="mt">✏️ Modifier facture</div><div class="mc" onclick="closeModal('moEditFac')">✕</div></div><div class="mb"><div class="fg" style="margin-bottom:14px"><div class="fm"><label>Client</label><select id="ef_cli"></select></div><div class="fm"><label>Statut</label><select id="ef_st"><option value="brouillon">Brouillon</option><option value="envoyee">Envoyée</option><option value="payee">Payée</option><option value="en_retard">En retard</option><option value="annulee">Annulée</option></select></div><div class="fm"><label>Date facture</label><input type="date" id="ef_date"></div><div class="fm"><label>Date échéance</label><input type="date" id="ef_ech"></div><div class="fm s2"><label>Objet</label><input type="text" id="ef_obj"></div><div class="fm s2"><label>Notes</label><textarea id="ef_notes"></textarea></div></div>
+<label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:7px">Lignes</label>
+<div class="ilt"><div class="ilh"><div>Désignation</div><div>Qté</div><div>P.U. HT</div><div>Total HT</div><div></div></div><div id="efLines"></div>
+<div class="tot"><div class="tr"><span class="tl">Sous-total HT</span><span class="tv" id="ef_ht">0 DA</span></div><div class="tr"><span class="tl">TVA 19%</span><span class="tv" id="ef_tva">0 DA</span></div><div class="tr grand"><span class="tl">Total TTC</span><span class="tv" id="ef_ttc">0 DA</span></div></div></div>
+<button class="btn btn-ghost btn-sm" onclick="addEditLine()">+ Ligne</button></div><div class="mf"><button class="btn btn-ghost" onclick="closeModal('moEditFac')">Annuler</button><button class="btn btn-primary" onclick="saveEditFac()">💾 Enregistrer</button></div></div></div>
+
+<!-- CHOISIR MODELE EXCEL -->
+<div class="mo" id="moUseFac"><div class="md" style="max-width:420px"><div class="mh"><div class="mt">📊 Choisir modèle Excel</div><div class="mc" onclick="closeModal('moUseFac')">✕</div></div><div class="mb"><div style="font-size:13px;color:var(--t2);margin-bottom:14px">Choisissez le modèle pour cette facture :</div><div id="modeleChoiceList" style="display:flex;flex-direction:column;gap:8px"></div></div></div></div>
+
+<!-- NOUVEAU MODELE -->
+<div class="mo" id="moNewModele"><div class="md" style="max-width:420px"><div class="mh"><div class="mt">🎨 Choisir un modèle de base</div><div class="mc" onclick="closeModal('moNewModele')">✕</div></div><div class="mb" style="display:flex;flex-direction:column;gap:8px">
+  <div class="qopt" onclick="closeModal('moNewModele');editModele('freelance')"><div class="qico" style="background:var(--blue-dim)">👤</div><div><div style="font-weight:700">Auto-entrepreneur</div><div style="font-size:12px;color:var(--t2)">Honoraires, consultations, cours</div></div></div>
+  <div class="qopt" onclick="closeModal('moNewModele');editModele('education')"><div class="qico" style="background:var(--green-dim)">🎓</div><div><div style="font-weight:700">Éducation / Formation</div><div style="font-size:12px;color:var(--t2)">Cours, ateliers, sessions</div></div></div>
+  <div class="qopt" onclick="closeModal('moNewModele');editModele('commerce')"><div class="qico" style="background:var(--amber-dim)">🏪</div><div><div style="font-weight:700">Commerce / Négoce</div><div style="font-size:12px;color:var(--t2)">Produits, TVA, références</div></div></div>
+  <div class="qopt" onclick="closeModal('moNewModele');editModele('service')"><div class="qico" style="background:var(--purple-dim)">⚙️</div><div><div style="font-weight:700">Prestation de Service</div><div style="font-size:12px;color:var(--t2)">IT, maintenance, installation</div></div></div>
+  <div class="qopt" onclick="closeModal('moNewModele');editModele('custom')"><div class="qico" style="background:var(--red-dim)">✨</div><div><div style="font-weight:700">Personnalisé</div><div style="font-size:12px;color:var(--t2)">De zéro, colonnes libres</div></div></div>
+</div></div></div>
+
+<!-- QUICK NEW -->
+<div class="mo" id="moNew"><div class="md" style="max-width:380px"><div class="mh"><div class="mt">Créer…</div><div class="mc" onclick="closeModal('moNew')">✕</div></div><div class="mb" style="display:flex;flex-direction:column;gap:8px">
+  <div class="qopt" onclick="closeModal('moNew');openModal('moFac')"><div class="qico" style="background:var(--blue-dim)">🧾</div><div><div style="font-weight:700">Nouvelle Facture</div><div style="font-size:12px;color:var(--t2)">Facturez un client</div></div></div>
+  <div class="qopt" onclick="closeModal('moNew');openModal('moDev')"><div class="qico" style="background:var(--amber-dim)">📋</div><div><div style="font-weight:700">Nouveau Devis</div><div style="font-size:12px;color:var(--t2)">Proposition commerciale</div></div></div>
+  <div class="qopt" onclick="closeModal('moNew');openModal('moCli')"><div class="qico" style="background:var(--green-dim)">👤</div><div><div style="font-weight:700">Nouveau Client</div><div style="font-size:12px;color:var(--t2)">Ajoutez un client</div></div></div>
+  <div class="qopt" onclick="closeModal('moNew');openModal('moProd')"><div class="qico" style="background:var(--purple-dim)">📦</div><div><div style="font-weight:700">Nouveau Produit</div><div style="font-size:12px;color:var(--t2)">Ajout au stock</div></div></div>
+</div></div></div>
+
+<div class="tw-wrap" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+// Config chargée depuis les constantes globales définies plus bas
+let CFG = {};  // sera rempli après le chargement des constantes
+let USER_PLAN = localStorage.getItem('nxf_user_plan')||'free';
+let USER_EMAIL = localStorage.getItem('nxf_user_email')||'';
+let currentFacId=null, currentClientId=null;
+let facFilter={statut:'',search:'',offset:0};
+let cliFilter={statut:'',search:'',offset:0};
+const PS=20;
+
+// ══════════════════════════════════════════
+// PUBLICITÉS
+// ══════════════════════════════════════════
+let ADS=[], adIndex=0, currentPubId=null;
+
+async function loadAds() {
+  if (USER_PLAN==='pro') { hideAdBar(); return; }
+  try {
+    if (HF_BACKEND) {
+      const res = await fetch(HF_BACKEND.replace(/\/$/,'')+'/publicites');
+      const data = await res.json();
+      ADS = data.data || [];
+    }
+  } catch(e) {}
+  if (!ADS.length) {
+    ADS = [
+      {texte:'🏦 CPA Logiciel — Essai gratuit 30 jours', url:'#'},
+      {texte:'📦 Brico Pro Oran — Matériaux construction', url:'#'},
+      {texte:'💻 Formation Excel Algérie — 5 jours', url:'#'},
+      {texte:'🚗 Assurance auto — Devis en ligne', url:'#'},
+      {texte:'📱 Galaxy A55 — Livraison 48h Algérie', url:'#'},
+    ];
+  }
+  showNextAd();
+  setInterval(showNextAd, 8000);
+}
+
+function showNextAd() {
+  if (!ADS.length) return;
+  const ad = ADS[adIndex % ADS.length];
+  currentPubId = ad.id||null;
+  const el = document.getElementById('adText');
+  if (el) {
+    el.style.opacity='0';
+    setTimeout(()=>{ el.textContent=ad.texte; el.style.opacity='1'; },300);
+  }
+  adIndex++;
+}
+
+function clicPub() {
+  if (currentPubId && HF_BACKEND) {
+    fetch(HF_BACKEND+'/publicites/'+currentPubId+'/clic', {method:'POST'}).catch(()=>{});
+  }
+}
+
+function closeAdBar() {
+  document.getElementById('adBar').classList.add('hidden');
+  document.getElementById('adBar').style.display='none';
+  document.getElementById('sidebar').classList.add('no-ad');
+  document.getElementById('mainWrap').classList.add('no-ad');
+}
+
+function hideAdBar() {
+  document.getElementById('adBar').style.display='none';
+  document.getElementById('sidebar').classList.add('no-ad');
+  document.getElementById('mainWrap').classList.add('no-ad');
+}
+
+function copyPayInfo() {
+  const ent = getEnt();
+  const ccp = ent.banque?.ccp || document.getElementById('ccpNum').textContent;
+  const txt = `NexaFlow Pro — 990 DA/mois\nCCP: ${ccp}\nEnvoyer preuve à: ${document.getElementById('emailPaie').textContent}`;
+  navigator.clipboard.writeText(txt).then(()=>toast('Infos copiées ✅','success'));
+}
+
+// ══════════════════════════════════════════
+// PLAN CHECK
+// ══════════════════════════════════════════
+async function checkUserPlan() {
+  if (!USER_EMAIL || !HF_BACKEND) return;
+  try {
+    const res = await fetch(HF_BACKEND.replace(/\/$/,'')+'/users/'+encodeURIComponent(USER_EMAIL)+'/plan');
+    const data = await res.json();
+    USER_PLAN = data.plan||'free';
+    localStorage.setItem('nxf_user_plan', USER_PLAN);
+    updatePlanUI();
+  } catch(e) {}
+}
+
+function updatePlanUI() {
+  const badge = document.getElementById('planBadgeSidebar');
+  const title = document.getElementById('pbsTitle');
+  const desc  = document.getElementById('pbsDesc');
+  const link  = document.getElementById('pbsLink');
+  if (USER_PLAN==='pro') {
+    badge.className='plan-badge-sidebar pro';
+    title.className='pbs-title pro'; title.textContent='⭐ Plan Pro';
+    desc.textContent='Sans publicité · Excel pro';
+    link.className='pbs-link pro'; link.textContent='✅ Actif';
+    hideAdBar();
+  } else {
+    badge.className='plan-badge-sidebar free';
+    title.className='pbs-title free'; title.textContent='⚡ Plan Gratuit';
+    desc.textContent='Publicités activées';
+    link.className='pbs-link free'; link.textContent='Passer au Pro →';
+  }
+  // Page Mon Plan
+  const pd = document.getElementById('planDetails');
+  if (pd) {
+    if (USER_PLAN==='pro') {
+      pd.innerHTML=`<div style="background:var(--blue-dim);border:1px solid rgba(79,142,247,.2);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px"><div style="font-size:32px">⭐</div><div><div style="font-weight:700;font-size:15px;color:var(--blue)">Plan Pro Actif</div><div style="font-size:13px;color:var(--t2)">Toutes les fonctionnalités débloquées</div></div></div>`;
+    } else {
+      pd.innerHTML=`<div style="background:var(--s3);border:1px solid var(--border);border-radius:10px;padding:16px"><div style="font-weight:700;margin-bottom:6px">Plan Gratuit</div><div style="font-size:13px;color:var(--t2)">Publicités actives · Excel basique</div></div>`;
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════════
+async function sb(path, opts={}) {
+  const token = (() => { try { const s=JSON.parse(localStorage.getItem('nxf_session')||'{}'); return s.access_token||null; } catch{return null;} })();
+  const res = await fetch(SB_URL+'/rest/v1/'+path, {
+    method: opts.method||'GET',
+    headers: {
+      'apikey': SB_KEY, 'Authorization': 'Bearer '+(token||SB_KEY),
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer||'return=representation',
+      ...opts.headers
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!res.ok) { const e=await res.text(); throw new Error(e); }
+  if (res.status===204) return [];
+  return res.json();
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
+  // Show auth screen first — app hidden until login
+  const authEl = document.getElementById('authScreen');
+  if(authEl) authEl.style.display='flex';
+
+  const _cu = document.getElementById('cfgUrl'); if(_cu) _cu.value = SB_URL||'';
+  const _ck = document.getElementById('cfgKey'); if(_ck) _ck.value = '';
+  const _cb = document.getElementById('cfgBackend'); if(_cb) _cb.value = HF_BACKEND||'';
+  loadEntreprise(); loadBanque();
+  const t=new Date().toISOString().split('T')[0];
+  const t30=new Date(Date.now()+30*864e5).toISOString().split('T')[0];
+  ['f_date','d_date'].forEach(i=>{const el=document.getElementById(i);if(el)el.value=t;});
+  ['f_ech','d_val'].forEach(i=>{const el=document.getElementById(i);if(el)el.value=t30;});
+  document.getElementById('pay_dt').value=t;
+  updatePlanUI();
+  if (SB_URL&&SB_KEY) {
+    setConnected();
+    loadDash(); loadBadges();
+    checkUserPlan();
+    loadAds();
+  } else {
+    document.getElementById('calAlert').style.display='block';
+    loadAds();
+  }
+  loadModeles();
+});
+
+function setConnected() {
+  document.getElementById('apiStatus')?.remove();
+  document.getElementById('calAlert').style.display='none';
+}
+
+function saveConfig() {
+  CFG.url     = document.getElementById('cfgUrl').value.trim();
+  CFG.key     = document.getElementById('cfgKey').value.trim();
+  HF_BACKEND = document.getElementById('cfgBackend')?.value?.trim()||'';
+  localStorage.setItem('nxf_cfg', JSON.stringify(CFG));
+}
+
+async function testConn() {
+  saveConfig();
+  const el = document.getElementById('connSt');
+  el.innerHTML='<span style="color:var(--t2)">⏳ Test…</span>';
+  try {
+    const d = await sb('clients?limit=1');
+    el.innerHTML=`<span style="color:var(--green)">✅ Connexion réussie ! ${Array.isArray(d)?d.length:0} client(s).</span>`;
+    setConnected(); loadDash(); loadBadges(); loadAds(); checkUserPlan();
+    toast('Connexion Supabase OK ✅','success');
+  } catch(e) {
+    el.innerHTML=`<span style="color:var(--red)">❌ ${e.message.substring(0,150)}</span>`;
+    toast('Erreur connexion','error');
+  }
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+const fmt = n => (n||0).toLocaleString('fr-DZ',{maximumFractionDigits:0})+' DA';
+const fmtD = d => { if(!d)return'—'; try{return new Date(d).toLocaleDateString('fr-DZ');}catch{return d;} };
+const v = id => { const el=document.getElementById(id); return el?el.value.trim()||null:null; };
+const ini = s => (s||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+const colors=['var(--blue-dim)','var(--green-dim)','var(--amber-dim)','var(--purple-dim)','var(--red-dim)'];
+const clr = s => { let h=0; for(let c of(s||''))h+=c.charCodeAt(0); return colors[h%colors.length]; };
+
+function stBadge(s) {
+  const m={payee:'<span class="sb s-pay">Payée</span>',envoyee:'<span class="sb s-env">Envoyée</span>',en_retard:'<span class="sb s-ret">En retard</span>',brouillon:'<span class="sb s-bro">Brouillon</span>',annulee:'<span class="sb s-ann">Annulée</span>',actif:'<span class="sb s-act">Actif</span>',inactif:'<span class="sb s-ann">Inactif</span>',prospect:'<span class="sb s-pro">Prospect</span>',envoye:'<span class="sb s-env">Envoyé</span>',accepte:'<span class="sb s-pay">Accepté</span>',converti:'<span class="sb s-act">Converti</span>'};
+  return m[s]||`<span class="sb s-bro">${s||'—'}</span>`;
+}
+
+async function genNum(table,prefix) {
+  const d=await sb(`${table}?select=numero&order=numero.desc&limit=1`);
+  let n=1;
+  if(d.length){const last=d[0].numero?.replace(prefix,'');if(!isNaN(last))n=parseInt(last)+1;}
+  return prefix+String(n).padStart(4,'0');
+}
+
+function calcTot(lignes) {
+  let ht=0,tva=0;
+  lignes.forEach(l=>{const lht=(l.quantite||1)*(l.prix_unitaire||0);const ltva=lht*((l.tva||19)/100);l.montant_ht=Math.round(lht*100)/100;l.montant_ttc=Math.round((lht+ltva)*100)/100;ht+=lht;tva+=ltva;});
+  return{sous_total:Math.round(ht*100)/100,montant_ht:Math.round(ht*100)/100,montant_tva:Math.round(tva*100)/100,montant_ttc:Math.round((ht+tva)*100)/100};
+}
+
+function getLines(cid){return[...document.querySelectorAll(`#${cid} .il`)].map(r=>{const ins=r.querySelectorAll('input');return{designation:ins[0].value.trim(),quantite:parseFloat(ins[1].value)||1,prix_unitaire:parseFloat(ins[2].value)||0,tva:19,unite:'unité'};}).filter(l=>l.designation);}
+
+function calcLines(cid,hid,tid,ttcid){let ht=0,tva=0;document.querySelectorAll(`#${cid} .il`).forEach(r=>{const ins=r.querySelectorAll('input');const q=parseFloat(ins[1].value)||0,p=parseFloat(ins[2].value)||0,t=q*p;ins[3].value=t.toLocaleString('fr-DZ')+' DA';ht+=t;tva+=t*.19;});document.getElementById(hid).textContent=fmt(ht);document.getElementById(tid).textContent=fmt(tva);document.getElementById(ttcid).textContent=fmt(ht+tva);}
+
+const calcFac=()=>calcLines('fLines','f_ht','f_tva','f_ttc');
+const calcDev=()=>calcLines('dLines','d_ht','d_tva','d_ttc');
+const calcEF =()=>calcLines('efLines','ef_ht','ef_tva','ef_ttc');
+
+function mkLine(fn,cont){const d=document.createElement('div');d.className='il';d.innerHTML=`<input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="${fn}()"><input type="number" value="0" min="0" oninput="${fn}()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'${cont}','${fn}')" style="cursor:pointer;color:var(--t3);font-size:15px;text-align:center">✕</span>`;return d;}
+const addFacLine=()=>document.getElementById('fLines').appendChild(mkLine('calcFac','fLines'));
+const addDevLine=()=>document.getElementById('dLines').appendChild(mkLine('calcDev','dLines'));
+const addEditLine=()=>document.getElementById('efLines').appendChild(mkLine('calcEF','efLines'));
+function rmLine(el,cont,fn){if(document.querySelectorAll(`#${cont} .il`).length>1){el.closest('.il').remove();window[fn]&&window[fn]();}}
+function resetLines(id){document.getElementById(id).innerHTML=`<div class="il"><input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="${id==='fLines'?'calcFac':'calcDev'}()"><input type="number" value="0" min="0" oninput="${id==='fLines'?'calcFac':'calcDev'}()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'${id}','${id==='fLines'?'calcFac':'calcDev'}')" style="cursor:pointer;color:var(--t3);font-size:15px;text-align:center">✕</span></div>`;}
+
+async function fillCliSel(ids=[]){if(!CFG.url||!CFG.key)return;try{const data=await sb('clients?statut=eq.actif&order=raison_sociale&select=id,raison_sociale');ids.forEach(id=>{const sel=document.getElementById(id);if(!sel)return;const cur=sel.value;sel.innerHTML='<option value="">-- Sélectionner --</option>'+data.map(c=>`<option value="${c.id}">${c.raison_sociale}</option>`).join('');if(cur)sel.value=cur;});}catch(e){}}
+
+function getEnt(){return JSON.parse(localStorage.getItem('nxf_ent')||'{"raison_sociale":"Mon Entreprise","rc":"","nif":"","nis":"","telephone":"","email":"","adresse":"","activite":"","banque":{}}');}
+function loadEntreprise(){const ent=getEnt();['eRs:raison_sociale','eRc:rc','eNif:nif','eNis:nis','eTel:telephone','eEmail:email','eAdr:adresse','eAct:activite'].forEach(pair=>{const[elId,key]=pair.split(':');const el=document.getElementById(elId);if(el)el.value=ent[key]||'';});}
+function saveEntreprise(){const ent=getEnt();['eRs:raison_sociale','eRc:rc','eNif:nif','eNis:nis','eTel:telephone','eEmail:email','eAdr:adresse','eAct:activite'].forEach(pair=>{const[elId,key]=pair.split(':');const el=document.getElementById(elId);if(el)ent[key]=el.value.trim();});localStorage.setItem('nxf_ent',JSON.stringify(ent));toast('Entreprise sauvegardée ✅','success');}
+function loadBanque(){const ent=getEnt();const bk=ent.banque||{};[['bNom','nom'],['bRib','rib'],['bCompte','compte'],['bCode','code_banque'],['bAgence','code_agence'],['bCcp','ccp']].forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)el.value=bk[key]||'';});}
+function saveBanque(){const ent=getEnt();ent.banque=ent.banque||{};[['bNom','nom'],['bRib','rib'],['bCompte','compte'],['bCode','code_banque'],['bAgence','code_agence'],['bCcp','ccp']].forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)ent.banque[key]=el.value.trim();});localStorage.setItem('nxf_ent',JSON.stringify(ent));const ccp=ent.banque.ccp||'';document.getElementById('ccpNum').textContent=ccp||'123456789';toast('Informations bancaires sauvegardées ✅','success');}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+async function loadDash(){
+  try{
+    const[facs,devs,cls]=await Promise.all([sb('factures?select=montant_ttc,statut,numero,date_facture,clients(raison_sociale)&order=created_at.desc&limit=6'),sb('devis?select=id&statut=in.(brouillon,envoye)'),sb('clients?order=created_at.desc&limit=5')]);
+    const payees=facs.filter(f=>f.statut==='payee');
+    const ca=payees.reduce((s,f)=>s+f.montant_ttc,0);
+    const att=facs.filter(f=>f.statut==='envoyee'||f.statut==='en_retard').reduce((s,f)=>s+f.montant_ttc,0);
+    document.getElementById('dashSub').textContent=`Données en temps réel · ${new Date().toLocaleDateString('fr-DZ')}`;
+    document.getElementById('dashKpis').innerHTML=`<div class="kpi bl"><div class="ki bl">💰</div><div class="kv bl">${fmt(ca)}</div><div class="kl">CA encaissé</div></div><div class="kpi gr"><div class="ki gr">✅</div><div class="kv gr">${payees.length}</div><div class="kl">Factures payées</div></div><div class="kpi rd"><div class="ki rd">⏰</div><div class="kv rd">${fmt(att)}</div><div class="kl">En attente</div></div><div class="kpi am"><div class="ki am">📋</div><div class="kv am">${devs.length}</div><div class="kl">Devis ouverts</div></div>`;
+    document.getElementById('dashFac').innerHTML=`<table><thead><tr><th>N°</th><th>Client</th><th>Montant</th><th>Statut</th></tr></thead><tbody>${facs.map(f=>`<tr style="cursor:pointer" onclick="viewFacture('${f.id||''}')"><td style="color:var(--blue);font-weight:700">${f.numero}</td><td>${f.clients?.raison_sociale||'—'}</td><td style="font-weight:600">${fmt(f.montant_ttc)}</td><td>${stBadge(f.statut)}</td></tr>`).join('')}</tbody></table>`;
+    document.getElementById('dashCli').innerHTML=`<table><thead><tr><th>Entreprise</th><th>Ville</th><th>Statut</th></tr></thead><tbody>${cls.map(c=>`<tr style="cursor:pointer" onclick="viewClient('${c.id}')"><td style="font-weight:600">${c.raison_sociale}</td><td>${c.ville||'—'}</td><td>${stBadge(c.statut)}</td></tr>`).join('')}</tbody></table>`;
+  }catch(e){console.error(e);}
+}
+
+async function loadBadges(){try{const[a,b,c]=await Promise.all([sb('clients?select=id&statut=eq.actif'),sb('factures?select=id&statut=in.(envoyee,en_retard)'),sb('devis?select=id&statut=in.(brouillon,envoye)')]);document.getElementById('nbClients').textContent=a.length||'';document.getElementById('nbFac').textContent=b.length||'';document.getElementById('nbDev').textContent=c.length||'';}catch(e){}}
+
+// ══════════════════════════════════════════
+// CLIENTS
+// ══════════════════════════════════════════
+async function loadClients(){
+  try{
+    let q='clients?order=created_at.desc';
+    if(cliFilter.statut)q+=`&statut=eq.${cliFilter.statut}`;
+    if(cliFilter.search)q+=`&raison_sociale=ilike.*${encodeURIComponent(cliFilter.search)}*`;
+    q+=`&offset=${cliFilter.offset}&limit=${PS}`;
+    const d=await sb(q);
+    document.getElementById('cliSub').textContent=`${d.length} clients`;
+    document.getElementById('cliCount').textContent=`${d.length} résultat(s)`;
+    document.getElementById('cliPgInfo').textContent=`Page ${Math.floor(cliFilter.offset/PS)+1}`;
+    if(!d.length){document.getElementById('cliTbl').innerHTML=`<tr><td colspan="6"><div class="empty"><div class="empty-ico">👤</div><div class="empty-t">Aucun client</div><div class="empty-s">Créez votre premier client.</div><button class="btn btn-primary" onclick="openModal('moCli')">+ Nouveau client</button></div></td></tr>`;return;}
+    document.getElementById('cliTbl').innerHTML=d.map(c=>`<tr><td><div class="ac"><div class="ma" style="background:${clr(c.raison_sociale)}">${ini(c.raison_sociale)}</div><div><div style="font-weight:600">${c.raison_sociale}</div><div style="font-size:11px;color:var(--t3)">${c.rc||''}</div></div></div></td><td><div>${c.nom_contact||'—'}</div><div style="font-size:11px;color:var(--t3)">${c.email||''}</div></td><td>${c.ville||'—'}</td><td>${stBadge(c.statut)}</td><td style="color:var(--t2);font-size:12px">${fmtD(c.created_at)}</td><td><div class="ra"><div class="ab" onclick="viewClient('${c.id}')" title="Voir">👁️</div><div class="ab" onclick="editClient('${c.id}')" title="Modifier">✏️</div><div class="ab" onclick="exportClientPDF('${c.id}')" title="PDF">📄</div><div class="ab" onclick="delClient('${c.id}')" title="Désactiver">🗑️</div></div></td></tr>`).join('');
+  }catch(e){toast('Erreur clients: '+e.message,'error');}
+}
+const searchClients=q=>{cliFilter.search=q;cliFilter.offset=0;loadClients();};
+const filterCliSt=s=>{cliFilter.statut=s;cliFilter.offset=0;loadClients();};
+const cliPg=d=>{cliFilter.offset=Math.max(0,cliFilter.offset+d*PS);loadClients();};
+
+async function viewClient(id){currentClientId=id;openModal('moViewCli');document.getElementById('vcBody').innerHTML='<div class="loading"><div class="spin"></div></div>';try{const[c,facs]=await Promise.all([sb(`clients?id=eq.${id}`).then(d=>d[0]),sb(`factures?client_id=eq.${id}&select=numero,date_facture,montant_ttc,statut&order=date_facture.desc&limit=10`)]);document.getElementById('vcTitle').textContent=c.raison_sociale;const caTotal=facs.filter(f=>f.statut==='payee').reduce((s,f)=>s+f.montant_ttc,0);document.getElementById('vcBody').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px"><div style="background:var(--s3);border-radius:9px;padding:14px"><div style="font-size:10px;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Informations</div>${[['RC',c.rc],['NIF',c.nif],['NIS',c.nis],['Statut',stBadge(c.statut)]].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${val||'—'}</span></div>`).join('')}</div><div style="background:var(--s3);border-radius:9px;padding:14px"><div style="font-size:10px;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Contact</div>${[['Contact',c.nom_contact],['Tél',c.telephone],['Email',c.email],['Ville',c.ville]].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${val||'—'}</span></div>`).join('')}</div></div><div style="background:var(--s3);border-radius:9px;padding:14px;margin-bottom:14px;display:flex;gap:24px"><div><div style="font-size:11px;color:var(--t3)">CA TOTAL</div><div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:20px;color:var(--green)">${fmt(caTotal)}</div></div><div><div style="font-size:11px;color:var(--t3)">FACTURES</div><div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:20px;color:var(--blue)">${facs.length}</div></div></div>${facs.length?`<table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:8px 0;font-size:11px;color:var(--t3)">N°</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Date</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Montant</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Statut</th></tr></thead><tbody>${facs.map(f=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--blue);font-weight:700;font-size:13px">${f.numero}</td><td style="padding:8px 0;font-size:13px">${fmtD(f.date_facture)}</td><td style="padding:8px 0;font-weight:600;font-size:13px">${fmt(f.montant_ttc)}</td><td style="padding:8px 0">${stBadge(f.statut)}</td></tr>`).join('')}</tbody></table>`:'<div style="text-align:center;padding:20px;color:var(--t3)">Aucune facture</div>'}`;
+  }catch(e){toast('Erreur','error');}}
+
+async function editClient(id){currentClientId=id;try{const c=(await sb(`clients?id=eq.${id}`))[0];[['ec_rs','raison_sociale'],['ec_rc','rc'],['ec_nif','nif'],['ec_nis','nis'],['ec_act','activite'],['ec_nom','nom_contact'],['ec_tel','telephone'],['ec_email','email'],['ec_adr','adresse'],['ec_notes','notes']].forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)el.value=c[key]||'';});document.getElementById('ec_ville').value=c.ville||'Oran';document.getElementById('ec_st').value=c.statut||'actif';closeModal('moViewCli');openModal('moEditCli');}catch(e){toast('Erreur','error');}}
+
+async function saveEditClient(){const rs=v('ec_rs');if(!rs){toast('Raison sociale obligatoire','error');return;}try{await sb(`clients?id=eq.${currentClientId}`,{method:'PATCH',prefer:'return=minimal',body:{raison_sociale:rs,rc:v('ec_rc'),nif:v('ec_nif'),nis:v('ec_nis'),activite:v('ec_act'),nom_contact:v('ec_nom'),telephone:v('ec_tel'),email:v('ec_email'),adresse:v('ec_adr'),ville:document.getElementById('ec_ville').value,statut:document.getElementById('ec_st').value,notes:v('ec_notes')}});toast('Client modifié ✅','success');closeModal('moEditCli');loadClients();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+async function createClient(){const rs=v('c_rs');if(!rs){toast('Raison sociale obligatoire','error');return;}try{await sb('clients',{method:'POST',body:{raison_sociale:rs,rc:v('c_rc'),nif:v('c_nif'),nis:v('c_nis'),activite:v('c_act'),nom_contact:v('c_nom'),telephone:v('c_tel'),email:v('c_email'),adresse:v('c_adr'),ville:document.getElementById('c_ville').value,statut:document.getElementById('c_st').value,notes:v('c_notes'),wilaya:null,art:null}});toast('Client créé ✅','success');closeModal('moCli');['c_rs','c_rc','c_nif','c_nis','c_act','c_nom','c_tel','c_email','c_adr','c_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});loadClients();loadBadges();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+async function delClient(id){if(!confirm('Désactiver ce client ?'))return;try{await sb(`clients?id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{statut:'inactif'}});toast('Client désactivé','info');loadClients();loadBadges();}catch(e){toast('Erreur','error');}}
+
+// ══════════════════════════════════════════
+// FACTURES
+// ══════════════════════════════════════════
+async function loadFactures(){
+  try{
+    let q='factures?select=*,clients(raison_sociale,email)&order=created_at.desc';
+    if(facFilter.statut)q+=`&statut=eq.${facFilter.statut}`;
+    if(facFilter.search)q+=`&numero=ilike.*${encodeURIComponent(facFilter.search)}*`;
+    q+=`&offset=${facFilter.offset}&limit=${PS}`;
+    const d=await sb(q);
+    const all=await sb('factures?select=id,statut');
+    document.getElementById('fcAll').textContent=all.length;
+    document.getElementById('fcPay').textContent=all.filter(f=>f.statut==='payee').length;
+    document.getElementById('fcAtt').textContent=all.filter(f=>f.statut==='envoyee').length;
+    document.getElementById('fcRet').textContent=all.filter(f=>f.statut==='en_retard').length;
+    document.getElementById('facSub').textContent=`${d.length} factures`;
+    document.getElementById('facPgInfo').textContent=`Page ${Math.floor(facFilter.offset/PS)+1}`;
+    if(!d.length){document.getElementById('facTbl').innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-ico">🧾</div><div class="empty-t">Aucune facture</div><button class="btn btn-primary" onclick="openModal('moFac')">+ Nouvelle facture</button></div></td></tr>`;return;}
+    document.getElementById('facTbl').innerHTML=d.map(f=>`<tr><td style="color:var(--blue);font-weight:700;cursor:pointer" onclick="viewFacture('${f.id}')">${f.numero}</td><td>${f.clients?.raison_sociale||'—'}</td><td style="color:var(--t2);font-size:12px">${fmtD(f.date_facture)}</td><td style="color:var(--t2);font-size:12px">${fmtD(f.date_echeance)}</td><td style="font-weight:700">${fmt(f.montant_ttc)}</td><td>${stBadge(f.statut)}</td><td><div class="ra"><div class="ab" onclick="viewFacture('${f.id}')" title="Voir">👁️</div><div class="ab" onclick="openEditFac('${f.id}')" title="Modifier">✏️</div><div class="ab" onclick="dupFac('${f.id}')" title="Dupliquer">📋</div><div class="ab" onclick="openPay('${f.id}','${f.montant_ttc}')" title="Paiement">💳</div><div class="ab" onclick="dlPDF('${f.id}')" title="PDF">📄</div><div class="ab" onclick="exportAvecModele('${f.id}')" title="Excel pro">📊</div><div class="ab" onclick="annulerFac('${f.id}')" title="Annuler">🗑️</div></div></td></tr>`).join('');
+  }catch(e){toast('Erreur factures: '+e.message,'error');}
+}
+const filterFacSt=s=>{facFilter.statut=s;facFilter.offset=0;loadFactures();};
+const searchFac=s=>{facFilter.search=s;facFilter.offset=0;loadFactures();};
+const facPg=d=>{facFilter.offset=Math.max(0,facFilter.offset+d*PS);loadFactures();};
+
+async function viewFacture(id){currentFacId=id;openModal('moViewFac');document.getElementById('vfBody').innerHTML='<div class="loading"><div class="spin"></div></div>';try{const[fac,lignes,paies]=await Promise.all([sb(`factures?id=eq.${id}&select=*,clients(*)`).then(d=>d[0]),sb(`lignes_facture?facture_id=eq.${id}&order=ordre`),sb(`paiements?facture_id=eq.${id}&order=date_paiement.desc`)]);document.getElementById('vfTitle').textContent=`Facture ${fac.numero}`;const totalPaye=paies.reduce((s,p)=>s+p.montant,0);const reste=fac.montant_ttc-totalPaye;document.getElementById('vfActions').innerHTML=`<button class="btn btn-ghost btn-xs" onclick="openEditFac('${id}')">✏️</button><button class="btn btn-ghost btn-xs" onclick="dupFac('${id}')">📋</button><button class="btn btn-success btn-xs" onclick="openPay('${id}','${fac.montant_ttc}')">💳</button><button class="btn btn-danger btn-xs" onclick="dlPDF('${id}')">📄 PDF</button><button class="btn btn-ghost btn-xs" onclick="exportAvecModele('${id}')">📊 Excel</button>`;document.getElementById('vfBody').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px"><div style="background:var(--s3);border-radius:9px;padding:14px"><div style="font-size:10px;color:var(--t3);margin-bottom:8px">FACTURE</div>${[['Numéro',`<span style="color:var(--blue);font-weight:700">${fac.numero}</span>`],['Statut',stBadge(fac.statut)],['Date',fmtD(fac.date_facture)],['Échéance',fmtD(fac.date_echeance)],['Objet',fac.objet||'—']].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${val}</span></div>`).join('')}</div><div style="background:var(--s3);border-radius:9px;padding:14px"><div style="font-size:10px;color:var(--t3);margin-bottom:8px">CLIENT</div>${[['Entreprise',`<strong>${fac.clients?.raison_sociale||'—'}</strong>`],['Contact',fac.clients?.nom_contact||'—'],['Tél',fac.clients?.telephone||'—'],['Email',fac.clients?.email||'—']].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${val}</span></div>`).join('')}</div></div><table style="width:100%;border-collapse:collapse;margin-bottom:14px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:8px 0;font-size:11px;color:var(--t3)">Désignation</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Qté</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">P.U. HT</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">TVA</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Total HT</th></tr></thead><tbody>${lignes.map(l=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;font-size:13px">${l.designation}</td><td style="padding:8px 0;font-size:13px">${l.quantite}</td><td style="padding:8px 0;font-size:13px">${fmt(l.prix_unitaire)}</td><td style="padding:8px 0;font-size:13px">${l.tva||19}%</td><td style="padding:8px 0;font-weight:600;font-size:13px">${fmt(l.montant_ht)}</td></tr>`).join('')}</tbody></table><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;border-top:1px solid var(--border);padding-top:10px;margin-bottom:14px"><div class="tr"><span class="tl">Sous-total HT</span><span class="tv">${fmt(fac.montant_ht)}</span></div><div class="tr"><span class="tl">TVA 19%</span><span class="tv">${fmt(fac.montant_tva)}</span></div><div class="tr grand"><span class="tl">Total TTC</span><span class="tv" style="color:var(--blue)">${fmt(fac.montant_ttc)}</span></div></div>${paies.length?`<div style="background:var(--s3);border-radius:9px;padding:14px"><div style="font-size:10px;color:var(--t3);margin-bottom:8px">PAIEMENTS</div>${paies.map(p=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${fmtD(p.date_paiement)} · ${p.mode}</span><span style="color:var(--green);font-weight:600">${fmt(p.montant)}</span></div>`).join('')}<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:var(--t2)">Reste à payer</span><span style="color:${reste>0?'var(--red)':'var(--green)'};font-weight:700">${fmt(Math.max(0,reste))}</span></div></div>`:''}${fac.notes?`<div style="margin-top:12px;background:var(--s3);border-radius:8px;padding:12px;font-size:13px;color:var(--t2)">${fac.notes}</div>`:''}`;
+  }catch(e){toast('Erreur','error');}}
+
+async function openEditFac(id){currentFacId=id;closeModal('moViewFac');openModal('moEditFac');await fillCliSel(['ef_cli']);try{const[fac,lignes]=await Promise.all([sb(`factures?id=eq.${id}`).then(d=>d[0]),sb(`lignes_facture?facture_id=eq.${id}&order=ordre`)]);document.getElementById('ef_cli').value=fac.client_id;document.getElementById('ef_st').value=fac.statut;document.getElementById('ef_date').value=fac.date_facture||'';document.getElementById('ef_ech').value=fac.date_echeance||'';document.getElementById('ef_obj').value=fac.objet||'';document.getElementById('ef_notes').value=fac.notes||'';const cont=document.getElementById('efLines');cont.innerHTML='';lignes.forEach(l=>{const d2=document.createElement('div');d2.className='il';d2.innerHTML=`<input type="text" value="${l.designation}"><input type="number" value="${l.quantite}" min="0.01" step="0.01" oninput="calcEF()"><input type="number" value="${l.prix_unitaire}" min="0" oninput="calcEF()"><input type="text" value="${fmt(l.montant_ht)}" readonly><span onclick="rmLine(this,'efLines','calcEF')" style="cursor:pointer;color:var(--t3);font-size:15px;text-align:center">✕</span>`;cont.appendChild(d2);});if(!lignes.length)cont.appendChild(mkLine('calcEF','efLines'));calcEF();}catch(e){toast('Erreur','error');}}
+
+async function saveEditFac(){const cli=document.getElementById('ef_cli').value;if(!cli){toast('Sélectionnez un client','error');return;}const lignes=getLines('efLines');if(!lignes.length){toast('Ajoutez au moins une ligne','error');return;}try{const tot=calcTot(lignes);await sb(`factures?id=eq.${currentFacId}`,{method:'PATCH',prefer:'return=minimal',body:{client_id:cli,statut:document.getElementById('ef_st').value,date_facture:v('ef_date'),date_echeance:v('ef_ech'),objet:v('ef_obj'),notes:v('ef_notes'),...tot}});await sb(`lignes_facture?facture_id=eq.${currentFacId}`,{method:'DELETE',prefer:'return=minimal'});if(lignes.length)await sb('lignes_facture',{method:'POST',body:lignes.map((l,i)=>({...l,facture_id:currentFacId,ordre:i}))});toast('Facture modifiée ✅','success');closeModal('moEditFac');loadFactures();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+async function createFacture(forceSt){const cli=document.getElementById('f_cli').value;if(!cli){toast('Sélectionnez un client','error');return;}const lignes=getLines('fLines');if(!lignes.length){toast('Ajoutez au moins une ligne','error');return;}try{const tot=calcTot(lignes);const num=await genNum('factures','FAC-');const st=forceSt||document.getElementById('f_st').value;const fac=await sb('factures',{method:'POST',body:{numero:num,client_id:cli,statut:st,date_facture:v('f_date'),date_echeance:v('f_ech'),objet:v('f_obj'),notes:v('f_notes'),...tot}});const fid=fac[0].id;if(lignes.length)await sb('lignes_facture',{method:'POST',body:lignes.map((l,i)=>({...l,facture_id:fid,ordre:i}))});toast(`Facture ${num} créée ✅`,'success');closeModal('moFac');resetLines('fLines');calcFac();loadFactures();loadBadges();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+async function annulerFac(id){if(!confirm('Annuler cette facture ?'))return;try{await sb(`factures?id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{statut:'annulee'}});toast('Facture annulée','info');loadFactures();}catch(e){toast('Erreur','error');}}
+
+async function dupFac(id){try{const[fac,lignes]=await Promise.all([sb(`factures?id=eq.${id}`).then(d=>d[0]),sb(`lignes_facture?facture_id=eq.${id}&order=ordre`)]);const num=await genNum('factures','FAC-');const nf=await sb('factures',{method:'POST',body:{...fac,id:undefined,numero:num,statut:'brouillon',date_facture:new Date().toISOString().split('T')[0],created_at:undefined,updated_at:undefined}});const nfid=nf[0].id;if(lignes.length)await sb('lignes_facture',{method:'POST',body:lignes.map(l=>({...l,id:undefined,facture_id:nfid}))});toast(`Facture dupliquée → ${num} ✅`,'success');loadFactures();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+// PAIEMENTS
+let payFacId=null;
+function openPay(id,montant){payFacId=id;document.getElementById('pay_mt').value=parseFloat(montant).toFixed(0);closeModal('moViewFac');openModal('moPay');}
+async function savePaiement(){const mt=parseFloat(document.getElementById('pay_mt').value)||0;if(!mt){toast('Montant invalide','error');return;}try{await sb('paiements',{method:'POST',body:{facture_id:payFacId,montant:mt,date_paiement:document.getElementById('pay_dt').value,mode:document.getElementById('pay_mode').value,reference:v('pay_ref')}});const fac=(await sb(`factures?id=eq.${payFacId}&select=montant_ttc`))[0];const paies=await sb(`paiements?facture_id=eq.${payFacId}&select=montant`);const total=paies.reduce((s,p)=>s+p.montant,0);if(total>=fac.montant_ttc)await sb(`factures?id=eq.${payFacId}`,{method:'PATCH',prefer:'return=minimal',body:{statut:'payee'}});await sb('tresorerie',{method:'POST',body:{type:'entree',montant:mt,description:'Paiement facture',reference:v('pay_ref'),facture_id:payFacId,date_mouvement:document.getElementById('pay_dt').value,categorie:'Encaissement'}});toast('Paiement enregistré ✅','success');closeModal('moPay');loadFactures();loadBadges();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+// ══════════════════════════════════════════
+// DEVIS
+// ══════════════════════════════════════════
+async function loadDevis(){try{const d=await sb('devis?select=*,clients(raison_sociale)&order=created_at.desc');if(!d.length){document.getElementById('devTbl').innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-ico">📋</div><div class="empty-t">Aucun devis</div><button class="btn btn-primary" onclick="openModal('moDev')">+ Nouveau devis</button></div></td></tr>`;return;}document.getElementById('devTbl').innerHTML=d.map(dv=>`<tr><td style="color:var(--blue);font-weight:700">${dv.numero}</td><td>${dv.clients?.raison_sociale||'—'}</td><td style="color:var(--t2)">${dv.objet||'—'}</td><td style="color:var(--t2);font-size:12px">${fmtD(dv.date_devis)}</td><td style="font-weight:700">${fmt(dv.montant_ttc)}</td><td>${stBadge(dv.statut)}</td><td><div class="ra"><div class="ab" onclick="convDev('${dv.id}')" title="Convertir">🧾</div><div class="ab" onclick="dlDevPDF('${dv.id}')" title="PDF">📄</div><div class="ab" onclick="delDev('${dv.id}')" title="Supprimer">🗑️</div></div></td></tr>`).join('');}catch(e){toast('Erreur devis','error');}}
+
+async function createDevis(){const cli=document.getElementById('d_cli').value;if(!cli){toast('Sélectionnez un client','error');return;}const lignes=getLines('dLines');if(!lignes.length){toast('Ajoutez au moins une ligne','error');return;}try{const tot=calcTot(lignes);const num=await genNum('devis','DEV-');const dev=await sb('devis',{method:'POST',body:{numero:num,client_id:cli,date_devis:v('d_date'),date_validite:v('d_val'),statut:document.getElementById('d_st').value,objet:v('d_obj'),...tot}});const did=dev[0].id;if(lignes.length)await sb('lignes_devis',{method:'POST',body:lignes.map((l,i)=>({...l,devis_id:did,ordre:i}))});toast(`Devis ${num} créé ✅`,'success');closeModal('moDev');resetLines('dLines');loadDevis();loadBadges();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+async function convDev(id){if(!confirm('Convertir ce devis en facture ?'))return;try{const dev=(await sb(`devis?id=eq.${id}`))[0];const lignes=await sb(`lignes_devis?devis_id=eq.${id}&order=ordre`);const num=await genNum('factures','FAC-');const fac=await sb('factures',{method:'POST',body:{numero:num,client_id:dev.client_id,date_facture:new Date().toISOString().split('T')[0],statut:'brouillon',objet:dev.objet,sous_total:dev.sous_total,montant_ht:dev.montant_ht,montant_tva:dev.montant_tva,montant_ttc:dev.montant_ttc}});const fid=fac[0].id;if(lignes.length)await sb('lignes_facture',{method:'POST',body:lignes.map(l=>{const nl={...l};delete nl.id;delete nl.devis_id;nl.facture_id=fid;return nl;})});await sb(`devis?id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{statut:'converti',facture_id:fid}});toast(`Devis converti → Facture ${num} ✅`,'success');loadDevis();loadFactures();loadBadges();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+async function delDev(id){if(!confirm('Supprimer ce devis ?'))return;try{await sb(`lignes_devis?devis_id=eq.${id}`,{method:'DELETE',prefer:'return=minimal'});await sb(`devis?id=eq.${id}`,{method:'DELETE',prefer:'return=minimal'});toast('Devis supprimé','info');loadDevis();loadBadges();}catch(e){toast('Erreur','error');}}
+
+// ══════════════════════════════════════════
+// STOCK
+// ══════════════════════════════════════════
+async function loadStock(alertOnly=false){try{let data=await sb('produits?actif=eq.true&order=designation');if(alertOnly)data=data.filter(p=>p.stock_actuel<=p.stock_min);document.getElementById('stSub').textContent=`${data.length} produits · ${data.filter(p=>p.stock_actuel<=p.stock_min).length} alertes`;const icos={'NET':'🖥️','CAB':'🔌','CAM':'📷','PRN':'🖨️','UPS':'⚡','SRV':'🖧'};const ic=r=>icos[r?.split('-')[0]]||'📦';const clrSt=p=>p.stock_actuel<=p.stock_min?'var(--red)':p.stock_actuel<(p.stock_max||1)*.4?'var(--amber)':'var(--green)';document.getElementById('stGrid').innerHTML=data.length?data.map(p=>`<div class="sc"><div style="display:flex;align-items:center;gap:11px;margin-bottom:11px"><div class="sth">${ic(p.reference)}</div><div><div style="font-weight:600;font-size:13px">${p.designation}</div><div style="font-size:11px;color:var(--t3)">${p.reference||'—'}</div></div></div><div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:22px;color:${clrSt(p)}">${p.stock_actuel}</div><div style="font-size:11px;color:var(--t3);margin-bottom:7px">${p.unite||'unité'}(s) · PV: ${fmt(p.prix_vente)}</div><div class="pb"><div class="pf" style="width:${Math.min(100,Math.round((p.stock_actuel/(p.stock_max||1))*100))}%;background:${clrSt(p)}"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px"><span>Min: ${p.stock_min}</span><span>Max: ${p.stock_max}</span></div><div style="display:flex;gap:5px;margin-top:10px"><div class="ab" onclick="mvtStock('${p.id}','entree')" title="Entrée">📥</div><div class="ab" onclick="mvtStock('${p.id}','sortie')" title="Sortie">📤</div></div></div>`).join(''):`<div style="grid-column:span 3"><div class="empty"><div class="empty-ico">📦</div><div class="empty-t">Aucun produit</div><button class="btn btn-primary" onclick="openModal('moProd')">+ Nouveau produit</button></div></div>`;}catch(e){toast('Erreur stock','error');}}
+
+async function createProduit(){const des=v('p_des');if(!des){toast('Désignation obligatoire','error');return;}try{await sb('produits',{method:'POST',body:{designation:des,reference:v('p_ref'),description:null,unite:document.getElementById('p_un').value,prix_vente:parseFloat(v('p_pv')||0),prix_achat:parseFloat(v('p_pa')||0),tva:parseFloat(v('p_tva')||19),stock_actuel:parseInt(v('p_st')||0),stock_min:parseInt(v('p_sm')||5),stock_max:parseInt(v('p_sx')||50),actif:true,categorie:null}});toast('Produit créé ✅','success');closeModal('moProd');loadStock();}catch(e){toast('Erreur: '+e.message,'error');}}
+
+async function mvtStock(id,type){const q=prompt(type==='entree'?'Quantité à ajouter:':'Quantité à retirer:');if(!q||isNaN(q))return;try{const p=(await sb(`produits?id=eq.${id}&select=stock_actuel`))[0];const avant=p.stock_actuel,apres=type==='entree'?avant+parseFloat(q):Math.max(0,avant-parseFloat(q));await sb(`produits?id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{stock_actuel:apres}});await sb('mouvements_stock',{method:'POST',body:{produit_id:id,type,quantite:parseFloat(q),stock_avant:avant,stock_apres:apres}});toast(`Stock: ${avant} → ${apres}`,'success');loadStock();}catch(e){toast('Erreur','error');}}
+
+// ══════════════════════════════════════════
+// TRÉSORERIE
+// ══════════════════════════════════════════
+async function loadTreso(){try{const d=await sb('tresorerie?order=date_mouvement.desc&limit=100');const ent=d.filter(t=>t.type==='entree').reduce((s,t)=>s+t.montant,0);const sor=d.filter(t=>t.type==='sortie').reduce((s,t)=>s+t.montant,0);document.getElementById('tSolde').textContent=fmt(ent-sor);document.getElementById('tEnt').textContent=fmt(ent);document.getElementById('tSor').textContent=fmt(sor);document.getElementById('tresoTbl').innerHTML=d.map(t=>`<tr><td>${fmtD(t.date_mouvement)}</td><td>${t.description||'—'}</td><td style="color:var(--t2);font-size:12px">${t.reference||'—'}</td><td><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:${t.type==='entree'?'var(--green-dim)':'var(--red-dim)'};color:${t.type==='entree'?'var(--green)':'var(--red)'}">${t.type==='entree'?'Entrée':'Sortie'}</span></td><td style="font-weight:700;color:${t.type==='entree'?'var(--green)':'var(--red)'}">${t.type==='entree'?'+':'-'}${fmt(t.montant)}</td></tr>`).join('');}catch(e){toast('Erreur trésorerie','error');}}
+
+// ══════════════════════════════════════════
+// EXPORTS EXCEL
+// ══════════════════════════════════════════
+function dlXLSX(rows,filename){const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Données');ws['!cols']=Object.keys(rows[0]||{}).map(k=>({wch:Math.max(k.length,14)}));XLSX.writeFile(wb,filename+'.xlsx');}
+
+async function exportFacturesExcel(){try{toast('Génération Excel…','info');const d=await sb('factures?select=*,clients(raison_sociale)&order=date_facture.desc');dlXLSX(d.map(f=>({'N° Facture':f.numero,'Client':f.clients?.raison_sociale||'—','Date':fmtD(f.date_facture),'Échéance':fmtD(f.date_echeance),'Objet':f.objet||'','HT':f.montant_ht,'TVA':f.montant_tva,'TTC':f.montant_ttc,'Statut':f.statut})),'Factures_NexaFlow');toast('Excel téléchargé ✅','success');}catch(e){toast('Erreur','error');}}
+
+async function exportClientsExcel(){try{const d=await sb('clients?order=raison_sociale');dlXLSX(d.map(c=>({'Raison sociale':c.raison_sociale,'RC':c.rc||'','NIF':c.nif||'','NIS':c.nis||'','Contact':c.nom_contact||'','Téléphone':c.telephone||'','Email':c.email||'','Ville':c.ville||'','Statut':c.statut})),'Clients_NexaFlow');toast('Excel téléchargé ✅','success');}catch(e){toast('Erreur','error');}}
+
+async function exportClientsCSV(){try{const d=await sb('clients?order=raison_sociale');const csv=['Raison sociale,RC,NIF,Contact,Téléphone,Email,Ville,Statut',...d.map(c=>`"${c.raison_sociale}","${c.rc||''}","${c.nif||''}","${c.nom_contact||''}","${c.telephone||''}","${c.email||''}","${c.ville||''}","${c.statut}"`)].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='clients_nexaflow.csv';a.click();toast('CSV téléchargé ✅','success');}catch(e){toast('Erreur','error');}}
+
+async function exportDevisExcel(){try{const d=await sb('devis?select=*,clients(raison_sociale)&order=date_devis.desc');dlXLSX(d.map(dv=>({'N° Devis':dv.numero,'Client':dv.clients?.raison_sociale||'—','Objet':dv.objet||'','Date':fmtD(dv.date_devis),'Validité':fmtD(dv.date_validite),'HT':dv.montant_ht,'TVA':dv.montant_tva,'TTC':dv.montant_ttc,'Statut':dv.statut})),'Devis_NexaFlow');toast('Excel téléchargé ✅','success');}catch(e){toast('Erreur','error');}}
+
+async function exportStockExcel(){try{const d=await sb('produits?actif=eq.true&order=designation');dlXLSX(d.map(p=>({'Référence':p.reference||'','Désignation':p.designation,'Unité':p.unite,'Prix vente HT':p.prix_vente,'Prix achat HT':p.prix_achat,'TVA %':p.tva,'Stock actuel':p.stock_actuel,'Stock min':p.stock_min,'Stock max':p.stock_max})),'Stock_NexaFlow');toast('Excel téléchargé ✅','success');}catch(e){toast('Erreur','error');}}
+
+async function exportTresoExcel(){try{const d=await sb('tresorerie?order=date_mouvement.desc');dlXLSX(d.map(t=>({'Date':fmtD(t.date_mouvement),'Type':t.type,'Description':t.description||'','Référence':t.reference||'','Montant':t.montant})),'Tresorerie_NexaFlow');toast('Excel téléchargé ✅','success');}catch(e){toast('Erreur','error');}}
+
+// ══════════════════════════════════════════
+// EXCEL PROFESSIONNEL (via backend HF)
+// ══════════════════════════════════════════
+async function dlFacExcelModele(facId,modeleId){
+  if(HF_BACKEND){
+    try{
+      toast('Génération Excel professionnel…','info');
+      const url=HF_BACKEND.replace(/\/$/,'')+'/factures/'+facId+'/excel?modele='+modeleId;
+      const res=await fetch(url);
+      if(!res.ok)throw new Error(await res.text());
+      const blob=await res.blob();
+      const cd=res.headers.get('Content-Disposition')||'';
+      const fname=cd.match(/filename=(.+)/)?.[1]||facId+'_'+modeleId+'.xlsx';
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();
+      toast('Excel professionnel téléchargé ✅','success');
+      return;
+    }catch(e){toast('Backend: '+e.message+' — Export basique utilisé','info');}
+  }
+  // Fallback basique
+  toast('Export Excel basique…','info');
+  try{
+    const[fac,lignes]=await Promise.all([sb('factures?id=eq.'+facId+'&select=*,clients(*)').then(d=>d[0]),sb('lignes_facture?facture_id=eq.'+facId+'&order=ordre')]);
+    const rows=lignes.map(l=>({'Désignation':l.designation,'Qté':l.quantite,'P.U. HT':l.prix_unitaire,'TVA%':l.tva||19,'Total HT':l.montant_ht,'Total TTC':l.montant_ttc}));
+    rows.push({});rows.push({'Désignation':'TOTAL TTC','Total TTC':fac.montant_ttc});
+    dlXLSX(rows,(fac.numero||facId).replace(/\//g,'-')+'_'+modeleId);
+    toast('Excel téléchargé ✅','success');
+  }catch(e){toast('Erreur: '+e.message,'error');}
+}
+
+async function exportAvecModele(facId){
+  const all={...TEMPLATES,...userModeles};
+  document.getElementById('modeleChoiceList').innerHTML=Object.entries(all).map(([id,m])=>`<div class="qopt" onclick="closeModal('moUseFac');dlFacExcelModele('${facId}','${id}')"><div class="qico">${m.icon}</div><div><div style="font-weight:700">${m.nom}</div><div style="font-size:12px;color:var(--t2)">${m.desc||''}</div></div></div>`).join('');
+  openModal('moUseFac');
+}
+
+// ══════════════════════════════════════════
+// PDF
+// ══════════════════════════════════════════
+function pdfNum(n){const num=Math.round(Number(n)||0);return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' DA';}
+function pdfDate(d){if(!d)return'--';try{const dt=new Date(d);return String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0')+'/'+dt.getFullYear();}catch{return String(d).substring(0,10);}}
+function pdfSt(s){const m={payee:'Payee',envoyee:'Envoyee',en_retard:'En retard',brouillon:'Brouillon',annulee:'Annulee',envoye:'Envoye'};return m[s]||s||'--';}
+function safe(str){return String(str||'').replace(/[^\x00-\xFF]/g,'').trim();}
+
+async function dlPDF(id){toast('Génération PDF…','info');try{const[fac,lignes]=await Promise.all([sb(`factures?id=eq.${id}&select=*,clients(*)`).then(d=>d[0]),sb(`lignes_facture?facture_id=eq.${id}&order=ordre`)]);const ent=getEnt();genPDF(fac,lignes,ent);toast('PDF téléchargé ✅','success');}catch(e){toast('Erreur PDF: '+e.message,'error');}}
+
+async function dlDevPDF(id){toast('Génération PDF…','info');try{const[dev,lignes]=await Promise.all([sb(`devis?id=eq.${id}&select=*,clients(*)`).then(d=>d[0]),sb(`lignes_devis?devis_id=eq.${id}&order=ordre`)]);const ent=getEnt();genPDF({...dev,type:'devis'},lignes,ent);toast('PDF téléchargé ✅','success');}catch(e){toast('Erreur PDF','error');}}
+
+function genPDF(fac,lignes,ent){const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');const W=210;const BL=[79,142,247],MU=[100,116,139],DK=[30,41,59],LT=[248,250,252];const cli=fac.clients||{};const titre=fac.type==='devis'?'DEVIS':'FACTURE';doc.setFillColor(...BL);doc.rect(0,0,W,32,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(26);doc.text(titre,W-14,20,{align:'right'});doc.setFontSize(11);doc.setFont('helvetica','normal');doc.text(safe(ent.raison_sociale||'Mon Entreprise'),14,13);doc.setFontSize(9);doc.text('N  '+safe(fac.numero),14,22);let y=38;doc.setFillColor(...LT);doc.rect(14,y-3,85,30,'F');doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(...MU);doc.text('DETAILS',16,y+2);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...DK);doc.text('Date      : '+pdfDate(fac.date_facture||fac.date_devis),16,y+9);doc.text('Echeance  : '+pdfDate(fac.date_echeance||fac.date_validite),16,y+16);doc.text('Statut    : '+pdfSt(fac.statut),16,y+23);doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(...MU);doc.text('EMETTEUR',108,y+2);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...DK);doc.text(safe(ent.raison_sociale||''),108,y+9);doc.setFontSize(8);doc.setTextColor(...MU);if(ent.adresse)doc.text(safe(ent.adresse).substring(0,38),108,y+15);doc.text('RC: '+safe(ent.rc||'--')+'   NIF: '+safe(ent.nif||'--'),108,y+21);doc.text('Tel: '+safe(ent.telephone||'--'),108,y+27);y+=36;doc.setFillColor(235,243,255);doc.rect(14,y-3,W-28,26,'F');doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(...MU);doc.text('DESTINATAIRE',16,y+2);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...DK);doc.text(safe(cli.raison_sociale||'--'),16,y+9);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...MU);if(cli.adresse)doc.text(safe(cli.adresse).substring(0,60),16,y+15);doc.text('RC: '+safe(cli.rc||'--')+'   NIF: '+safe(cli.nif||'--')+'   Tel: '+safe(cli.telephone||'--'),16,y+21);y+=32;if(fac.objet){doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...MU);doc.text('Objet :',14,y);doc.setFont('helvetica','normal');doc.setTextColor(...DK);doc.text(safe(fac.objet).substring(0,80),36,y);y+=8;}const CW=[88,14,30,14,30];const CX=[14,14+CW[0],14+CW[0]+CW[1],14+CW[0]+CW[1]+CW[2],14+CW[0]+CW[1]+CW[2]+CW[3]];doc.setFillColor(...BL);doc.rect(14,y,W-28,9,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(8);['DESIGNATION','QTE','PU HT (DA)','TVA','TOTAL HT'].forEach((h,i)=>doc.text(h,CX[i]+2,y+6));y+=9;lignes.forEach((l,idx)=>{const rH=8;if(idx%2===0){doc.setFillColor(255,255,255);}else{doc.setFillColor(...LT);}doc.rect(14,y,W-28,rH,'F');doc.setDrawColor(226,232,240);doc.setLineWidth(0.2);doc.rect(14,y,W-28,rH,'S');doc.setTextColor(...DK);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.text(safe(l.designation||'').substring(0,48),CX[0]+2,y+5.5);doc.text(String(Math.round((l.quantite||1)*100)/100),CX[1]+2,y+5.5);const pu=Math.round((l.prix_unitaire||0)*100)/100;doc.text(pu.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' '),CX[2]+2,y+5.5);doc.text(String(l.tva||19)+'%',CX[3]+2,y+5.5);doc.setFont('helvetica','bold');const mht=Math.round((l.montant_ht||0)*100)/100;doc.text(mht.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' DA',CX[4]+2,y+5.5);y+=rH;});y+=5;[['Sous-total HT',fac.montant_ht],['TVA 19%',fac.montant_tva]].forEach(([lbl,val])=>{doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...MU);doc.text(lbl,132,y);doc.setFont('helvetica','bold');doc.setTextColor(...DK);doc.text(pdfNum(val),W-14,y,{align:'right'});y+=7;});doc.setFillColor(...BL);doc.rect(125,y-3,W-14-125,11,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('TOTAL TTC',128,y+5);doc.text(pdfNum(fac.montant_ttc),W-14,y+5,{align:'right'});y+=18;if(fac.notes&&y<270){doc.setDrawColor(226,232,240);doc.setLineWidth(0.5);doc.line(14,y,W-14,y);y+=5;doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...MU);doc.text('Notes et conditions de paiement',14,y);y+=5;doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...DK);const noteLines=doc.splitTextToSize(safe(fac.notes).substring(0,300),W-28);noteLines.forEach(line=>{doc.text(line,14,y);y+=5;});}doc.setDrawColor(226,232,240);doc.setLineWidth(0.5);doc.line(14,284,W-14,284);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...MU);doc.text(safe(ent.raison_sociale||'')+' | RC: '+safe(ent.rc||'--')+' | NIF: '+safe(ent.nif||'--'),W/2,289,{align:'center'});doc.text('Document genere par NexaFlow',W/2,293,{align:'center'});doc.save(safe(fac.numero)+'.pdf');}
+
+async function exportClientPDF(id){const c=(await sb(`clients?id=eq.${id}`))[0];const facs=await sb(`factures?client_id=eq.${id}&order=date_facture.desc`);const{jsPDF}=window.jspdf;const doc=new jsPDF();const BL=[79/255,142/255,247/255];doc.setFillColor(...BL.map(x=>Math.round(x*255)));doc.rect(0,0,210,28,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('FICHE CLIENT',14,12);doc.setFontSize(11);doc.setFont('helvetica','normal');doc.text(c.raison_sociale,14,21);doc.setTextColor(0,0,0);let y=38;const row=(k,v2)=>{doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(100,116,139);doc.text(k,14,y);doc.setFont('helvetica','normal');doc.setTextColor(30,41,59);doc.text(String(v2||'—'),80,y);y+=7;};['raison_sociale','rc','nif','nis','nom_contact','telephone','email','adresse','ville','statut'].forEach(k=>row(k.replace('_',' ').toUpperCase(),c[k]));y+=5;doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('Historique des factures',14,y);y+=7;facs.forEach(f=>{doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text(`${f.numero}  ${fmtD(f.date_facture)}`,14,y);doc.setTextColor(30,41,59);doc.text(fmt(f.montant_ttc),120,y);doc.text(f.statut,160,y);y+=6;});doc.save(`fiche_client_${c.raison_sociale.replace(/\s/g,'_')}.pdf`);toast('PDF téléchargé ✅','success');}
+
+// ══════════════════════════════════════════
+// MODÈLES
+// ══════════════════════════════════════════
+const TEMPLATES={freelance:{nom:'Auto-entrepreneur',icon:'👤',color:'#1A3A6B',titre:"NOTE D'HONORAIRES",slogan:'Auto-entrepreneur',desc:'Honoraires, consultations, cours particuliers',tags:['Honoraires','Reçu','Freelance'],cols:[{id:'designation',label:'Nature de la prestation',type:'text'},{id:'periode',label:'Période / Date',type:'text'},{id:'quantite',label:'Heures / Jours',type:'number'},{id:'unite',label:'Unité',type:'text',default:'H'},{id:'prix_unitaire',label:'Tarif unitaire (DA)',type:'number'},{id:'montant',label:'Montant (DA)',type:'formula'}],tva:false,lettres:true,sig:true,banque:true,mentions:'Exonéré de TVA selon les dispositions fiscales en vigueur.'},education:{nom:'Éducation / Formation',icon:'🎓',color:'#0F4C75',titre:'FACTURE',slogan:'Enseignant / Formateur',desc:'Cours, ateliers, sessions de formation',tags:['Cours','Session','Heures'],cols:[{id:'designation',label:'Type de prestation',type:'text'},{id:'session',label:'Session / Détails',type:'text'},{id:'quantite',label:'Quantité',type:'number'},{id:'unite',label:'Unité',type:'text',default:'H'},{id:'prix_unitaire',label:'Prix unit. HT (DA)',type:'number'},{id:'montant',label:'Total TTC',type:'formula'}],tva:false,lettres:true,sig:true,banque:true,mentions:'Montant exprimé en dinars algériens, non assujetti à la TVA.'},commerce:{nom:'Commerce / Négoce',icon:'🏪',color:'#1B4332',titre:'FACTURE',slogan:'',desc:'Produits, références, remises, TVA',tags:['Produits','TTC','TVA 19%'],cols:[{id:'reference',label:'Référence',type:'text'},{id:'designation',label:'Désignation',type:'text'},{id:'quantite',label:'Qté',type:'number'},{id:'unite',label:'U',type:'text',default:'U'},{id:'prix_unitaire',label:'Prix HT (DA)',type:'number'},{id:'tva_ligne',label:'TVA %',type:'text',default:'19%'},{id:'montant',label:'Total TTC (DA)',type:'formula'}],tva:true,lettres:true,sig:false,banque:true,mentions:''},service:{nom:'Prestation de Service',icon:'⚙️',color:'#6B21A8',titre:'FACTURE',slogan:'Prestataire de services',desc:'IT, maintenance, conseil, installation',tags:['Service','Technique'],cols:[{id:'designation',label:"Nature de l'intervention",type:'text'},{id:'lieu',label:'Lieu / Site',type:'text'},{id:'duree',label:'Durée',type:'number'},{id:'unite',label:'Unité',type:'text',default:'H'},{id:'prix_unitaire',label:'Taux horaire (DA)',type:'number'},{id:'montant',label:'Montant HT (DA)',type:'formula'}],tva:true,lettres:true,sig:true,banque:true,mentions:''},custom:{nom:'Modèle personnalisé',icon:'✨',color:'#1A3A6B',titre:'FACTURE',slogan:'',desc:'Colonnes entièrement personnalisables',tags:['Personnalisé'],cols:[{id:'designation',label:'Description',type:'text'},{id:'quantite',label:'Quantité',type:'number'},{id:'prix_unitaire',label:'Prix unitaire (DA)',type:'number'},{id:'montant',label:'Total (DA)',type:'formula'}],tva:false,lettres:true,sig:true,banque:false,mentions:''}};
+let userModeles=JSON.parse(localStorage.getItem('nxf_modeles')||'{}');
+
+function loadModeles(){
+  const grid=document.getElementById('modelesGrid');
+  if(!grid)return;
+  const all={...Object.fromEntries(Object.entries(TEMPLATES).map(([k,v2])=>([k,{...v2,id:k,builtin:true}]))),...userModeles};
+  grid.innerHTML=Object.entries(all).map(([id,m])=>`<div class="mc-card"><div class="mc-preview" style="background:${m.color}20;color:${m.color}">${m.icon}</div><div class="mc-body"><div class="mc-title">${m.nom}</div><div class="mc-desc">${m.desc}</div><div class="mc-tags">${(m.tags||[]).map(t=>`<span class="mc-tag">${t}</span>`).join('')}</div><div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-primary btn-xs" onclick="editModele('${id}')">✏️ Personnaliser</button><button class="btn btn-ghost btn-xs" onclick="testModele('${id}')">📊 Tester</button>${!m.builtin?`<button class="btn btn-danger btn-xs" onclick="delModele('${id}')">🗑️</button>`:''}</div></div></div>`).join('');
+}
+
+function editModele(id){toast('Éditeur de modèle → ouvre nexaflow_modeles.html pour éditer','info');}
+function testModele(id){const m=userModeles[id]||TEMPLATES[id];if(!m)return;toast(`Test du modèle "${m.nom}" — utilisez le bouton 📊 sur une facture`,'info');}
+function delModele(id){if(!confirm('Supprimer ce modèle ?'))return;delete userModeles[id];localStorage.setItem('nxf_modeles',JSON.stringify(userModeles));loadModeles();toast('Modèle supprimé','info');}
+
+// ══════════════════════════════════════════
+// RECHERCHE GLOBALE
+// ══════════════════════════════════════════
+let srchTimer=null;
+async function globalSearch(q){const box=document.getElementById('srchRes');if(!q||q.length<2){box.classList.remove('open');return;}clearTimeout(srchTimer);srchTimer=setTimeout(async()=>{if(!CFG.url||!CFG.key){box.classList.remove('open');return;}try{const[cls,facs]=await Promise.all([sb(`clients?raison_sociale=ilike.*${encodeURIComponent(q)}*&select=id,raison_sociale,ville&limit=4`),sb(`factures?numero=ilike.*${encodeURIComponent(q)}*&select=id,numero,montant_ttc,statut&limit=4`)]);const items=[...cls.map(c=>`<div class="sr-item" onclick="closeSearch();viewClient('${c.id}')"><div style="width:28px;height:28px;border-radius:7px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px">👤</div><div><div style="font-size:13px;font-weight:500">${c.raison_sociale}</div><div style="font-size:11px;color:var(--t2)">${c.ville||'Client'}</div></div></div>`),...facs.map(f=>`<div class="sr-item" onclick="closeSearch();viewFacture('${f.id}')"><div style="width:28px;height:28px;border-radius:7px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px">🧾</div><div><div style="font-size:13px;font-weight:500">${f.numero}</div><div style="font-size:11px;color:var(--t2)">${fmt(f.montant_ttc)} · ${stBadge(f.statut)}</div></div></div>`)];if(!items.length)box.innerHTML='<div style="padding:14px;text-align:center;color:var(--t3);font-size:13px">Aucun résultat</div>';else box.innerHTML=items.join('');box.classList.add('open');}catch(e){}},300);}
+function closeSearch(){document.getElementById('srchRes').classList.remove('open');document.getElementById('srchInput').value='';}
+document.addEventListener('click',e=>{if(!document.getElementById('srchBox').contains(e.target))closeSearch();});
+
+// ══════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════
+function sstab(el,panelId){document.querySelectorAll('.ssi').forEach(i=>i.classList.remove('active'));el.classList.add('active');['ssConn','ssEnt','ssBanque','ssNotif','ssPlan'].forEach(id=>{const p=document.getElementById(id);if(p)p.style.display=id===panelId?'block':'none';});}
+
+// ══════════════════════════════════════════
+// DEMO DATA
+// ══════════════════════════════════════════
+async function initDemo(){
+  if(!CFG.url||!CFG.key){toast('Configurez Supabase d\'abord','error');return;}
+  if(!confirm('Insérer des données de démo ?'))return;
+  try{
+    const clients=[{raison_sociale:'SPA Techno DZ',rc:'23/00-1234567B05',nif:'000023001234567',nis:null,art:null,nom_contact:'Karim Berrabah',telephone:'+213 21 XX XX XX',email:'karim@techno.dz',adresse:null,ville:'Alger',wilaya:null,statut:'actif',notes:null,activite:'Informatique'},{raison_sociale:'EURL Benali & Fils',rc:'23/00-7654321B05',nif:'000023007654321',nis:null,art:null,nom_contact:'Mohamed Benali',telephone:'+213 41 XX XX XX',email:'m.benali@gmail.com',adresse:null,ville:'Oran',wilaya:null,statut:'actif',notes:null,activite:'Commerce'},{raison_sociale:'ETS Ramdane',rc:'23/00-9876543B05',nif:'000023009876543',nis:null,art:null,nom_contact:'Samir Ramdane',telephone:'+213 31 XX XX XX',email:'ets.ramdane@outlook.com',adresse:null,ville:'Constantine',wilaya:null,statut:'actif',notes:null,activite:'BTP'}];
+    for(const c of clients){try{await sb('clients',{method:'POST',body:c});}catch(e){}}
+    const produits=[{reference:'NET-024',designation:'Switch 24 ports Cisco',description:null,unite:'unité',prix_vente:45000,prix_achat:32000,tva:19,stock_actuel:14,stock_min:5,stock_max:20,categorie:'Réseau',actif:true},{reference:'CAB-001',designation:'Câble RJ45 Cat6 bobine 305m',description:null,unite:'bobine',prix_vente:8500,prix_achat:6000,tva:19,stock_actuel:8,stock_min:10,stock_max:50,categorie:'Câblage',actif:true}];
+    for(const p of produits){try{await sb('produits',{method:'POST',body:p});}catch(e){}}
+    toast('Données démo insérées ✅','success');loadDash();loadBadges();
+  }catch(e){toast('Erreur: '+e.message,'error');}
+}
+
+// ══════════════════════════════════════════
+// USER MENU
+// ══════════════════════════════════════════
+function toggleUserMenu(){
+  const existing=document.getElementById('userMenuPop');
+  if(existing){existing.remove();return;}
+  const m=document.createElement('div');
+  m.id='userMenuPop';
+  m.style.cssText='position:fixed;bottom:65px;left:14px;width:228px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:9999;padding:6px;';
+  m.innerHTML=`
+    <div style="padding:10px 12px;font-size:12px;color:var(--t3);border-bottom:1px solid var(--border);margin-bottom:4px">
+      ${USER_EMAIL||'Utilisateur'}<br>
+      <span style="color:${USER_PLAN==='pro'?'var(--blue)':'var(--t3)'}">Plan: ${USER_PLAN==='pro'?'⭐ Pro':'Gratuit'}</span>
+    </div>
+    <div onclick="openModal('moUpgrade');document.getElementById('userMenuPop')?.remove()" style="padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">💎 Plans & Tarifs</div>
+    <div onclick="goPage('parametres',null);document.getElementById('userMenuPop')?.remove()" style="padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">⚙️ Paramètres</div>
+    <div style="height:1px;background:var(--border);margin:4px 0"></div>
+    <div onclick="logout()" style="padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--red)" onmouseover="this.style.background='var(--red-dim)'" onmouseout="this.style.background=''">🚪 Déconnexion</div>`;
+  document.body.appendChild(m);
+  setTimeout(()=>document.addEventListener('click',function h(e){if(!m.contains(e.target)&&!document.querySelector('.su').contains(e.target)){m.remove();document.removeEventListener('click',h);}},{once:false}),100);
+}
+
+function logout(){localStorage.removeItem('nxf_session');localStorage.removeItem('nxf_demo');window.location.href='nexaflow_landing.html';}
+
+// ══════════════════════════════════════════
+// NAV & MODALS
+// ══════════════════════════════════════════
+const pgNames={dashboard:'Tableau de bord',clients:'Clients',factures:'Factures',devis:'Devis',stock:'Stock',modeles:'Modèles de Factures',tresorerie:'Trésorerie',parametres:'Paramètres'};
+const pgLoaders={clients:loadClients,factures:loadFactures,devis:loadDevis,stock:loadStock,tresorerie:loadTreso,modeles:loadModeles,dashboard:()=>{if(SB_URL&&SB_KEY)loadDash();}};
+
+function goPage(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id)?.classList.add('active');if(el)el.classList.add('active');document.getElementById('breadcrumb').textContent=pgNames[id]||id;if(pgLoaders[id]&&SB_URL&&SB_KEY)pgLoaders[id]();if(['factures','devis'].includes(id))fillCliSel(['f_cli','d_cli']);}
+
+function toggleG(el){el.classList.toggle('open');el.nextElementSibling?.classList.toggle('open');}
+
+function openModal(id){document.getElementById(id)?.classList.add('open');if(['moFac','moEditFac'].includes(id))fillCliSel(['f_cli','ef_cli']);if(id==='moDev')fillCliSel(['d_cli']);}
+function closeModal(id){document.getElementById(id)?.classList.remove('open');}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+function toast(msg,type='info'){const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=(type==='success'?'✅':type==='error'?'❌':'ℹ️')+' '+msg;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),3500);}
+</script>
+
+<!-- ══════════════════════════════════════
+  AUTH SCREEN
+══════════════════════════════════════ -->
+<div id="authScreen">
+  <div class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">N</div>
+        <div>
+          <div class="auth-logo-name">NexaFlow</div>
+          <div class="auth-logo-sub">Gestion Commerciale</div>
+        </div>
+      </div>
+      <div class="auth-tagline">Expérience simplifiée.<br><span>Aucune configuration requise.</span></div>
+      <p class="auth-desc">NexaFlow est prêt à l'emploi. Connectez-vous avec Google et commencez à gérer votre business immédiatement.</p>
+      <div class="auth-steps">
+        <div class="auth-step"><div class="auth-step-ico">🔐</div><div class="auth-step-txt"><strong>Connexion sécurisée</strong> avec Google OAuth</div></div>
+        <div class="auth-step"><div class="auth-step-ico">🏢</div><div class="auth-step-txt"><strong>Créez votre entreprise</strong> en quelques clics</div></div>
+        <div class="auth-step"><div class="auth-step-ico">🚀</div><div class="auth-step-txt"><strong>Dashboard immédiat</strong> — zéro configuration</div></div>
+        <div class="auth-step"><div class="auth-step-ico">🔒</div><div class="auth-step-txt"><strong>Supabase intégré</strong> côté serveur, invisible</div></div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div id="loginForm">
+        <div class="auth-form-title">Connexion</div>
+        <div class="auth-form-sub">Bienvenue ! Connectez-vous à votre espace.</div>
+        <button class="google-btn" onclick="loginGoogle()">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.5 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.5 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.5 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C36.9 35.9 44 30.7 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+          Continuer avec Google
+        </button>
+        <div class="auth-divider"><span>ou</span></div>
+        <div class="af">
+          <div class="af-field"><label>Email</label><input type="email" id="loginEmail" placeholder="votre@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+          <div class="af-field"><label>Mot de passe</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        </div>
+        <div class="auth-err" id="loginErr"></div>
+        <button class="auth-submit" onclick="doLogin()">Se connecter</button>
+        <div class="auth-switch">Pas de compte ? <a href="#" onclick="showSignup()">Créer gratuitement</a></div>
+        <button class="demo-btn" onclick="demoLogin()">Continuer en mode démo →</button>
+      </div>
+      <div id="signupForm" style="display:none">
+        <div class="auth-form-title">Créer un compte</div>
+        <div class="auth-form-sub">Gratuit pour toujours. Aucune carte requise.</div>
+        <button class="google-btn" onclick="loginGoogle()">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.5 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.5 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.5 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C36.9 35.9 44 30.7 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+          Continuer avec Google
+        </button>
+        <div class="auth-divider"><span>ou</span></div>
+        <div class="af">
+          <div class="af-field"><label>Nom complet</label><input type="text" id="signupName" placeholder="Votre nom"></div>
+          <div class="af-field"><label>Email</label><input type="email" id="signupEmail" placeholder="votre@email.com"></div>
+          <div class="af-field"><label>Mot de passe</label><input type="password" id="signupPass" placeholder="Minimum 8 caractères" onkeydown="if(event.key==='Enter')doSignup()"></div>
+        </div>
+        <div class="auth-err" id="signupErr"></div>
+        <button class="auth-submit" onclick="doSignup()">Créer mon compte 🚀</button>
+        <div class="auth-switch">Déjà un compte ? <a href="#" onclick="showLogin()">Se connecter</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG HARDCODÉE — invisible aux users
+// ══════════════════════════════════════════
+const SB_URL     = 'https://kmdwyilythmjopcklqlu.supabase.co';
+const SB_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttZHd5aWx5dGhtam9wY2tscWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTk2NzYsImV4cCI6MjA5MzY3NTY3Nn0.P72UHd0y13C_keMXvzk6nMdTeXaRykrNStI2d5MWfcA';
+const HF_BACKEND = 'https://stroke-ia-nexaflow-backend.hf.space';
+const VERCEL_URL = 'https://nexaflow-frontend-iota.vercel.app';
+
+function showLogin()  { document.getElementById('loginForm').style.display='block'; document.getElementById('signupForm').style.display='none'; }
+function showSignup() { document.getElementById('signupForm').style.display='block'; document.getElementById('loginForm').style.display='none'; }
+
+function loginGoogle() {
+  // OAuth → redirect vers Vercel (pas localhost)
+  window.location.href = SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(VERCEL_URL);
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginErr');
+  err.style.display = 'none';
+  if (!email || !pass) { err.textContent='Email et mot de passe requis'; err.style.display='block'; return; }
+  try {
+    const res = await fetch(SB_URL+'/auth/v1/token?grant_type=password', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pass})
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent=data.error_description||'Email ou mot de passe incorrect'; err.style.display='block'; return; }
+    localStorage.setItem('nxf_session', JSON.stringify({access_token:data.access_token,expires_at:Math.floor(Date.now()/1000)+(data.expires_in||3600),user:data.user}));
+    enterApp(data.user);
+  } catch(e) { err.textContent=e.message; err.style.display='block'; }
+}
+
+async function doSignup() {
+  const name  = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass  = document.getElementById('signupPass').value;
+  const err   = document.getElementById('signupErr');
+  if (!name||!email||!pass) { err.textContent='Tous les champs sont requis'; err.style.display='block'; return; }
+  if (pass.length<8) { err.textContent='Mot de passe trop court (min 8 caractères)'; err.style.display='block'; return; }
+  try {
+    const res = await fetch(SB_URL+'/auth/v1/signup', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pass,data:{full_name:name}})
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent=data.error_description||'Erreur inscription'; err.style.display='block'; return; }
+    if (typeof toast !== 'undefined') toast('Compte créé ! Vérifiez votre email.','success');
+    showLogin();
+  } catch(e) { err.textContent=e.message; err.style.display='block'; }
+}
+
+function demoLogin() {
+  localStorage.setItem('nxf_demo','1');
+  enterApp({email:'demo@nexaflow.dz', user_metadata:{full_name:'Utilisateur Démo'}});
+}
+
+function enterApp(user) {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  document.getElementById('adBar').style.display = '';
+  // Update user info in sidebar
+  const name  = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+  const email = user?.email || '';
+  const el = document.getElementById('userName');
+  const el2 = document.getElementById('userEmail');
+  const el3 = document.getElementById('userAva');
+  if(el) el.textContent = name;
+  if(el2) el2.textContent = email;
+  if(el3) el3.textContent = name[0]?.toUpperCase()||'U';
+  const dg = document.getElementById('dashGreeting')||document.querySelector('.pt');
+  if(dg && dg.id==='dashGreeting') dg.textContent = 'Bonjour, '+name.split(' ')[0]+' 👋';
+  // Check plan
+  if(HF_BACKEND && email && email !== 'demo@nexaflow.dz') {
+    fetch(HF_BACKEND+'/users/'+encodeURIComponent(email)+'/plan')
+      .then(r=>r.json()).then(d=>{
+        if(d.plan==='pro') { localStorage.setItem('nxf_user_plan','pro'); updatePlanUI&&updatePlanUI(); }
+      }).catch(()=>{});
+  }
+  // Check onboarding
+  const ent = (() => { try{return JSON.parse(localStorage.getItem('nxf_ent')||'{}')}catch{return{}} })();
+  if(!ent.raison_sociale) {
+    setTimeout(()=>{ if(typeof openModal!=='undefined') openModal('moOnboard'); },700);
+  }
+}
+
+// Auto-login check on page load
+window.addEventListener('load', () => {
+  // Handle OAuth hash redirect
+  if (window.location.hash.includes('access_token')) {
+    const p = new URLSearchParams(window.location.hash.slice(1));
+    const token = p.get('access_token');
+    fetch(SB_URL+'/auth/v1/user',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}})
+      .then(r=>r.json()).then(user=>{
+        localStorage.setItem('nxf_session',JSON.stringify({access_token:token,expires_at:Math.floor(Date.now()/1000)+3600,user}));
+        window.history.replaceState({},document.title,window.location.pathname);
+        enterApp(user);
+      }).catch(()=>{
+        localStorage.setItem('nxf_session',JSON.stringify({access_token:token,expires_at:Math.floor(Date.now()/1000)+3600,user:{}}));
+        window.history.replaceState({},document.title,window.location.pathname);
+        enterApp({});
+      });
+    return;
+  }
+  // Check existing session
+  try {
+    const s = JSON.parse(localStorage.getItem('nxf_session')||'{}');
+    if (s.access_token && s.expires_at && Date.now()/1000 < s.expires_at) { enterApp(s.user||{}); return; }
+  } catch(e) {}
+  if (localStorage.getItem('nxf_demo')) { enterApp({email:'demo@nexaflow.dz',user_metadata:{full_name:'Utilisateur Démo'}}); return; }
+  // Show auth screen
+  document.getElementById('authScreen').style.display = 'flex';
+});
+</script>
+
+</body>
+</html>
