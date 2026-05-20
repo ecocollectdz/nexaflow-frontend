@@ -1,0 +1,1670 @@
+PLACEHOLDER
+</option><option>Constantine</option><option>Annaba</option><option>Béjaïa</option><option>Sétif</option><option>Tlemcen</option><option>Blida</option><option>Autre</option></select></div>
+        <div class="fm"><label>Statut</label><select id="c_st"><option value="actif">Actif</option><option value="prospect">Prospect</option></select></div>
+        <div class="fm s2"><label>Adresse</label><input type="text" id="c_adr"></div>
+        <div class="fm s2"><label>Notes</label><textarea id="c_notes" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="closeModal('moCli')">Annuler</button><button class="btn btn-primary" onclick="createClient()">✅ Créer</button></div>
+  </div>
+</div>
+
+<!-- NOUVELLE FACTURE -->
+<div class="mo" id="moFac">
+  <div class="md lg">
+    <div class="mh"><div class="mt">🧾 Nouvelle facture</div><div class="mc" onclick="closeModal('moFac')">✕</div></div>
+    <div class="mb">
+      <div class="fg" style="margin-bottom:14px">
+        <div class="fm"><label>Client *</label><select id="f_cli"><option value="">-- Sélectionner --</option></select></div>
+        <div class="fm"><label>Statut</label><select id="f_st"><option value="brouillon">Brouillon</option><option value="envoyee">Envoyée</option></select></div>
+        <div class="fm"><label>Date</label><input type="date" id="f_date"></div>
+        <div class="fm"><label>Échéance</label><input type="date" id="f_ech"></div>
+        <div class="fm s2"><label>Objet</label><input type="text" id="f_obj" placeholder="Description de la prestation"></div>
+      </div>
+      <label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:7px">Lignes de facturation</label>
+      <div class="ilt">
+        <div class="ilh"><div>Désignation</div><div>Qté</div><div>P.U. HT (DA)</div><div>Total HT</div><div></div></div>
+        <div id="fLines">
+          <div class="il"><input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="calcFac()"><input type="number" value="0" min="0" oninput="calcFac()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'fLines','calcFac')" style="cursor:pointer;color:var(--t3);font-size:14px;text-align:center">✕</span></div>
+        </div>
+        <div class="tot">
+          <div class="tr"><span class="tl">Sous-total HT</span><span class="tv" id="f_ht">0 DA</span></div>
+          <div class="tr"><span class="tl">TVA 19%</span><span class="tv" id="f_tva">0 DA</span></div>
+          <div class="tr grand"><span class="tl">Total TTC</span><span class="tv" id="f_ttc" style="color:var(--blue)">0 DA</span></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="addFacLine()" style="margin-bottom:12px">+ Ajouter ligne</button>
+      <div class="fg">
+        <div class="fm"><label>Modèle Excel</label>
+          <select id="f_modele">
+            <option value="education">🎓 Éducation / Formation</option>
+            <option value="freelance">👤 Auto-entrepreneur</option>
+            <option value="commerce">🏪 Commerce / Négoce</option>
+            <option value="service">⚙️ Prestation de service</option>
+          </select>
+        </div>
+        <div class="fm"><label>Notes</label><textarea id="f_notes" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-ghost" onclick="closeModal('moFac')">Annuler</button>
+      <button class="btn btn-ghost" onclick="createFacture('brouillon')">💾 Brouillon</button>
+      <button class="btn btn-primary" onclick="createFacture('envoyee')">📤 Créer & Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOUVEAU DEVIS -->
+<div class="mo" id="moDev">
+  <div class="md lg">
+    <div class="mh"><div class="mt">📋 Nouveau devis</div><div class="mc" onclick="closeModal('moDev')">✕</div></div>
+    <div class="mb">
+      <div class="fg" style="margin-bottom:14px">
+        <div class="fm"><label>Client *</label><select id="d_cli"><option value="">-- Sélectionner --</option></select></div>
+        <div class="fm"><label>Statut</label><select id="d_st"><option value="brouillon">Brouillon</option><option value="envoye">Envoyé</option></select></div>
+        <div class="fm"><label>Date</label><input type="date" id="d_date"></div>
+        <div class="fm"><label>Validité jusqu'au</label><input type="date" id="d_val"></div>
+        <div class="fm s2"><label>Objet</label><input type="text" id="d_obj"></div>
+      </div>
+      <div class="ilt">
+        <div class="ilh"><div>Désignation</div><div>Qté</div><div>P.U. HT (DA)</div><div>Total HT</div><div></div></div>
+        <div id="dLines">
+          <div class="il"><input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="calcDev()"><input type="number" value="0" min="0" oninput="calcDev()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'dLines','calcDev')" style="cursor:pointer;color:var(--t3);font-size:14px;text-align:center">✕</span></div>
+        </div>
+        <div class="tot">
+          <div class="tr"><span class="tl">Sous-total HT</span><span class="tv" id="d_ht">0 DA</span></div>
+          <div class="tr"><span class="tl">TVA 19%</span><span class="tv" id="d_tva">0 DA</span></div>
+          <div class="tr grand"><span class="tl">Total TTC</span><span class="tv" id="d_ttc" style="color:var(--blue)">0 DA</span></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="addDevLine()">+ Ajouter ligne</button>
+    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="closeModal('moDev')">Annuler</button><button class="btn btn-primary" onclick="createDevis()">✅ Créer</button></div>
+  </div>
+</div>
+
+<!-- NOUVEAU PRODUIT -->
+<div class="mo" id="moProd">
+  <div class="md">
+    <div class="mh"><div class="mt">📦 Nouveau produit</div><div class="mc" onclick="closeModal('moProd')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fm s2"><label>Désignation *</label><input type="text" id="p_des"></div>
+        <div class="fm"><label>Référence</label><input type="text" id="p_ref"></div>
+        <div class="fm"><label>Unité</label><select id="p_un"><option>unité</option><option>bobine</option><option>lot</option><option>heure</option><option>service</option><option>kg</option><option>m</option></select></div>
+        <div class="fm"><label>Prix vente HT (DA)</label><input type="number" id="p_pv" value="0"></div>
+        <div class="fm"><label>Prix achat HT (DA)</label><input type="number" id="p_pa" value="0"></div>
+        <div class="fm"><label>TVA (%)</label><input type="number" id="p_tva" value="19"></div>
+        <div class="fm"><label>Stock actuel</label><input type="number" id="p_st" value="0"></div>
+        <div class="fm"><label>Stock minimum</label><input type="number" id="p_sm" value="5"></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="closeModal('moProd')">Annuler</button><button class="btn btn-primary" onclick="createProduit()">✅ Créer</button></div>
+  </div>
+</div>
+
+<!-- PAIEMENT -->
+<div class="mo" id="moPay">
+  <div class="md" style="max-width:420px">
+    <div class="mh"><div class="mt">💳 Enregistrer paiement</div><div class="mc" onclick="closeModal('moPay')">✕</div></div>
+    <div class="mb">
+      <div class="fg f1" style="gap:12px">
+        <div class="fm"><label>Montant (DA)</label><input type="number" id="pay_mt"></div>
+        <div class="fm"><label>Date</label><input type="date" id="pay_dt"></div>
+        <div class="fm"><label>Mode</label><select id="pay_mode"><option value="virement">Virement bancaire</option><option value="cheque">Chèque</option><option value="especes">Espèces</option><option value="ccp">CCP</option><option value="edahabia">Edahabia</option><option value="baridimob">BaridiMob</option></select></div>
+        <div class="fm"><label>Référence</label><input type="text" id="pay_ref"></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="closeModal('moPay')">Annuler</button><button class="btn btn-success" onclick="savePaiement()">✅ Confirmer</button></div>
+  </div>
+</div>
+
+<!-- VOIR FACTURE -->
+<div class="mo" id="moViewFac">
+  <div class="md xl">
+    <div class="mh">
+      <div class="mt" id="vfTitle">Facture</div>
+      <div style="display:flex;gap:5px;margin-right:8px" id="vfActions"></div>
+      <div class="mc" onclick="closeModal('moViewFac')">✕</div>
+    </div>
+    <div class="mb" id="vfBody"><div class="loading"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<!-- VOIR CLIENT -->
+<div class="mo" id="moViewCli">
+  <div class="md lg">
+    <div class="mh">
+      <div class="mt" id="vcTitle">Client</div>
+      <div style="display:flex;gap:5px;margin-right:8px"><button class="btn btn-ghost btn-xs" onclick="editClient(currentClientId)">✏️ Modifier</button></div>
+      <div class="mc" onclick="closeModal('moViewCli')">✕</div>
+    </div>
+    <div class="mb" id="vcBody"><div class="loading"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<!-- ÉDITER CLIENT -->
+<div class="mo" id="moEditCli">
+  <div class="md">
+    <div class="mh"><div class="mt">✏️ Modifier client</div><div class="mc" onclick="closeModal('moEditCli')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fm s2"><label>Raison sociale *</label><input type="text" id="ec_rs"></div>
+        <div class="fm"><label>N° RC</label><input type="text" id="ec_rc"></div>
+        <div class="fm"><label>N° NIF</label><input type="text" id="ec_nif"></div>
+        <div class="fm"><label>N° NIS</label><input type="text" id="ec_nis"></div>
+        <div class="fm"><label>Activité</label><input type="text" id="ec_act"></div>
+        <div class="fm"><label>Contact</label><input type="text" id="ec_nom"></div>
+        <div class="fm"><label>Téléphone</label><input type="text" id="ec_tel"></div>
+        <div class="fm"><label>Email</label><input type="email" id="ec_email"></div>
+        <div class="fm"><label>Ville</label><select id="ec_ville"><option>Oran</option><option>Alger</option><option>Constantine</option><option>Annaba</option><option>Béjaïa</option><option>Sétif</option><option>Tlemcen</option><option>Autre</option></select></div>
+        <div class="fm"><label>Statut</label><select id="ec_st"><option value="actif">Actif</option><option value="prospect">Prospect</option><option value="inactif">Inactif</option></select></div>
+        <div class="fm s2"><label>Adresse</label><input type="text" id="ec_adr"></div>
+        <div class="fm s2"><label>Notes</label><textarea id="ec_notes" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="closeModal('moEditCli')">Annuler</button><button class="btn btn-primary" onclick="saveEditClient()">💾 Enregistrer</button></div>
+  </div>
+</div>
+
+<!-- QUICK NEW -->
+<div class="mo" id="moNew">
+  <div class="md" style="max-width:360px">
+    <div class="mh"><div class="mt">Créer…</div><div class="mc" onclick="closeModal('moNew')">✕</div></div>
+    <div class="mb">
+      <div class="qopt" onclick="closeModal('moNew');openModal('moFac')"><div class="qico" style="background:var(--blue-d)">🧾</div><div><div style="font-weight:700">Nouvelle Facture</div><div style="font-size:12px;color:var(--t2)">Facturez un client</div></div></div>
+      <div class="qopt" onclick="closeModal('moNew');openModal('moDev')"><div class="qico" style="background:var(--amber-d)">📋</div><div><div style="font-weight:700">Nouveau Devis</div><div style="font-size:12px;color:var(--t2)">Proposition commerciale</div></div></div>
+      <div class="qopt" onclick="closeModal('moNew');openModal('moCli')"><div class="qico" style="background:var(--green-d)">👤</div><div><div style="font-weight:700">Nouveau Client</div><div style="font-size:12px;color:var(--t2)">Ajoutez un client</div></div></div>
+      <div class="qopt" onclick="closeModal('moNew');openModal('moProd')"><div class="qico" style="background:var(--purple-d)">📦</div><div><div style="font-weight:700">Nouveau Produit</div><div style="font-size:12px;color:var(--t2)">Ajout au stock</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHOISIR MODELE EXCEL -->
+<div class="mo" id="moUseFac">
+  <div class="md" style="max-width:420px">
+    <div class="mh"><div class="mt">📊 Modèle Excel</div><div class="mc" onclick="closeModal('moUseFac')">✕</div></div>
+    <div class="mb">
+      <div style="font-size:13px;color:var(--t2);margin-bottom:12px">Choisissez le modèle de facture Excel :</div>
+      <div id="modeleChoiceList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG HARDCODÉE — NE PAS MODIFIER
+// Les users ne voient jamais ces clés
+// ══════════════════════════════════════════
+const SB_URL     = 'https://kmdwyilythmjopcklqlu.supabase.co';
+const SB_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttZHd5aWx5dGhtam9wY2tscWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTk2NzYsImV4cCI6MjA5MzY3NTY3Nn0.P72UHd0y13C_keMXvzk6nMdTeXaRykrNStI2d5MWfcA';
+const HF_BACKEND = 'https://stroke-ia-nexaflow-backend.hf.space';
+const APP_URL    = 'https://nexaflow-frontend-iota.vercel.app';
+const GOOGLE_CALLBACK = APP_URL; // ← Vercel URL pour Google Auth
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let currentUser  = null;
+let USER_PLAN    = 'free';
+let currentFacId = null;
+let currentClientId = null;
+let currentPayFacId = null;
+let facFilter    = {statut:'', search:'', offset:0};
+let cliFilter    = {statut:'', search:'', offset:0};
+const PS = 20;
+
+// ══════════════════════════════════════════
+// SUPABASE API
+// ══════════════════════════════════════════
+async function sb(path, opts={}) {
+  const token = getToken();
+  const res = await fetch(SB_URL + '/rest/v1/' + path, {
+    method: opts.method || 'GET',
+    headers: {
+      'apikey':        SB_KEY,
+      'Authorization': 'Bearer ' + (token || SB_KEY),
+      'Content-Type':  'application/json',
+      'Prefer':        opts.prefer || 'return=representation',
+      ...opts.headers
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!res.ok) { const e = await res.text(); throw new Error(e); }
+  if (res.status === 204) return [];
+  return res.json();
+}
+
+async function sbAuth(path, opts={}) {
+  const res = await fetch(SB_URL + '/auth/v1/' + path, {
+    method: opts.method || 'POST',
+    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error_description || data.msg || 'Erreur auth');
+  return data;
+}
+
+function getToken() {
+  const s = localStorage.getItem('nxf_session');
+  if (!s) return null;
+  try { return JSON.parse(s).access_token; } catch { return null; }
+}
+
+function getSession() {
+  const s = localStorage.getItem('nxf_session');
+  if (!s) return null;
+  try { return JSON.parse(s); } catch { return null; }
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+function showLogin()  { document.getElementById('loginForm').style.display='block'; document.getElementById('signupForm').style.display='none'; }
+function showSignup() { document.getElementById('signupForm').style.display='block'; document.getElementById('loginForm').style.display='none'; }
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginErr');
+  err.style.display = 'none';
+  if (!email || !pass) { showErr('loginErr', 'Email et mot de passe requis'); return; }
+  try {
+    const data = await sbAuth('token?grant_type=password', { body: { email, password: pass } });
+    saveSession(data);
+    enterApp(data.user);
+  } catch(e) { showErr('loginErr', 'Email ou mot de passe incorrect'); }
+}
+
+async function doSignup() {
+  const name  = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass  = document.getElementById('signupPass').value;
+  if (!name || !email || !pass) { showErr('signupErr', 'Tous les champs sont requis'); return; }
+  if (pass.length < 8)          { showErr('signupErr', 'Mot de passe trop court (min 8 caractères)'); return; }
+  try {
+    await sbAuth('signup', { body: { email, password: pass, data: { full_name: name } } });
+    toast('Compte créé ! Vérifiez votre email.', 'success');
+    showLogin();
+  } catch(e) { showErr('signupErr', e.message); }
+}
+
+function loginGoogle() {
+  // Redirect to Supabase Google OAuth — callback vers Vercel (pas localhost)
+  window.location.href = SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(GOOGLE_CALLBACK);
+}
+
+function demoLogin() {
+  localStorage.setItem('nxf_demo', '1');
+  enterApp({ email: 'demo@nexaflow.dz', user_metadata: { full_name: 'Utilisateur Démo' } });
+}
+
+function saveSession(data) {
+  localStorage.setItem('nxf_session', JSON.stringify({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    expires_at: Math.floor(Date.now()/1000) + (data.expires_in || 3600),
+    user: data.user
+  }));
+}
+
+function enterApp(user) {
+  currentUser = user;
+  const name  = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+  const email = user?.email || '';
+  const ini   = name[0]?.toUpperCase() || 'U';
+
+  document.getElementById('userAva').textContent   = ini;
+  document.getElementById('userName').textContent  = name;
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('dashGreeting').textContent = `Bonjour, ${name.split(' ')[0]} 👋`;
+
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+
+  checkUserPlan(email);
+  loadAds();
+  loadDash();
+  loadBadges();
+  loadModeles();
+  initDates();
+
+  // Check onboarding
+  const ent = getEnt();
+  if (!ent.raison_sociale) {
+    setTimeout(() => openModal('moOnboard'), 600);
+  }
+}
+
+function logout() {
+  localStorage.removeItem('nxf_session');
+  localStorage.removeItem('nxf_demo');
+  localStorage.removeItem('nxf_user_plan');
+  currentUser = null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('authScreen').style.display = 'flex';
+  showLogin();
+  toast('Déconnecté', 'info');
+}
+
+// ══════════════════════════════════════════
+// AUTO-LOGIN AU CHARGEMENT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Handle OAuth redirect (hash fragment)
+  if (window.location.hash.includes('access_token')) {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const fakeSession = {
+      access_token:  params.get('access_token'),
+      refresh_token: params.get('refresh_token') || '',
+      expires_in:    parseInt(params.get('expires_in') || '3600'),
+      user:          { email: '', user_metadata: { full_name: 'Utilisateur Google' } }
+    };
+    saveSession(fakeSession);
+    // Fetch real user info
+    fetch(SB_URL + '/auth/v1/user', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + params.get('access_token') }
+    }).then(r => r.json()).then(u => {
+      const s = getSession();
+      if (s) { s.user = u; localStorage.setItem('nxf_session', JSON.stringify(s)); }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      enterApp(u);
+    }).catch(() => {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      enterApp(fakeSession.user);
+    });
+    return;
+  }
+
+  // Check existing session
+  const session = getSession();
+  if (session && session.access_token) {
+    if (session.expires_at && Date.now()/1000 < session.expires_at) {
+      enterApp(session.user || {});
+      return;
+    }
+  }
+  // Demo mode
+  if (localStorage.getItem('nxf_demo')) {
+    enterApp({ email: 'demo@nexaflow.dz', user_metadata: { full_name: 'Utilisateur Démo' } });
+    return;
+  }
+});
+
+// ══════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════
+let obCurrentStep = 1;
+
+function obNext() {
+  if (obCurrentStep === 1) {
+    const rs = document.getElementById('ob_rs').value.trim();
+    if (!rs) { toast('Raison sociale obligatoire', 'error'); return; }
+    // Sauvegarder step 1
+    const ent = getEnt();
+    ent.raison_sociale = rs;
+    ent.rc     = document.getElementById('ob_rc').value.trim();
+    ent.nif    = document.getElementById('ob_nif').value.trim();
+    ent.activite = document.getElementById('ob_act').value.trim();
+    ent.telephone = document.getElementById('ob_tel').value.trim();
+    ent.email  = document.getElementById('ob_email').value.trim();
+    ent.adresse = document.getElementById('ob_adr').value.trim();
+    localStorage.setItem('nxf_ent', JSON.stringify(ent));
+    loadEntreprise();
+    // Go to step 2
+    obCurrentStep = 2;
+    document.getElementById('obStep1').style.display = 'none';
+    document.getElementById('obStep2').style.display = 'block';
+    document.getElementById('ob1').classList.replace('active','done');
+    document.getElementById('ob2').classList.add('active');
+    document.getElementById('obNextBtn').textContent = 'Terminer ✅';
+  } else {
+    // Sauvegarder step 2 (banque)
+    const ent = getEnt();
+    ent.banque = ent.banque || {};
+    ent.banque.nom         = document.getElementById('ob_bnom').value.trim();
+    ent.banque.rib         = document.getElementById('ob_rib').value.trim();
+    ent.banque.compte      = document.getElementById('ob_compte').value.trim();
+    ent.banque.code_banque = document.getElementById('ob_code').value.trim();
+    ent.banque.ccp         = document.getElementById('ob_ccp').value.trim();
+    ent.banque.ccp_key     = document.getElementById('ob_ccpkey').value.trim();
+    localStorage.setItem('nxf_ent', JSON.stringify(ent));
+    saveBanque();
+    document.getElementById('ob2').classList.replace('active','done');
+    document.getElementById('ob3').classList.add('active');
+    closeModal('moOnboard');
+    updateCCPDisplay();
+    toast('Configuration terminée ! Bienvenue sur NexaFlow 🎉', 'success');
+  }
+}
+
+function skipOnboard() { closeModal('moOnboard'); }
+
+// ══════════════════════════════════════════
+// PLAN CHECK
+// ══════════════════════════════════════════
+async function checkUserPlan(email) {
+  if (!email) return;
+  try {
+    const res = await fetch(HF_BACKEND + '/users/' + encodeURIComponent(email) + '/plan');
+    const data = await res.json();
+    USER_PLAN = data.plan || 'free';
+    localStorage.setItem('nxf_user_plan', USER_PLAN);
+  } catch(e) {
+    USER_PLAN = localStorage.getItem('nxf_user_plan') || 'free';
+  }
+  updatePlanUI();
+}
+
+function updatePlanUI() {
+  const badge = document.getElementById('planBadge');
+  const title = document.getElementById('planTitle');
+  const desc  = document.getElementById('planDesc');
+  const btn   = document.getElementById('planBtn');
+  const adBar = document.getElementById('adBar');
+  const pubs  = document.getElementById('pubsSection');
+
+  if (USER_PLAN === 'pro') {
+    badge.className = 'splan pro';
+    title.className = 'splan-title';  title.textContent = '⭐ Plan Pro';
+    desc.textContent = 'Toutes fonctionnalités débloquées';
+    btn.textContent  = '✅ Actif';
+    if (adBar) adBar.classList.add('hidden');
+    if (pubs)  pubs.style.display = 'none';
+  } else {
+    badge.className = 'splan free';
+    title.className = 'splan-title'; title.textContent = '⚡ Plan Gratuit';
+    desc.textContent = 'Publicités activées';
+    btn.textContent  = 'Passer au Pro →';
+  }
+  // Plan page
+  const pd = document.getElementById('planDetails');
+  if (pd) {
+    pd.innerHTML = USER_PLAN === 'pro'
+      ? `<div style="background:var(--blue-d);border:1px solid rgba(79,110,247,.2);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px"><div style="font-size:32px">⭐</div><div><div style="font-weight:700;font-size:15px;color:var(--blue)">Plan Pro Actif</div><div style="font-size:13px;color:var(--t2)">Toutes les fonctionnalités débloquées · Aucune publicité</div></div></div>`
+      : `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px"><div style="font-weight:700;margin-bottom:6px">Plan Gratuit</div><div style="font-size:13px;color:var(--t2)">Publicités actives · Excel basique</div></div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+// PUBLICITÉS
+// ══════════════════════════════════════════
+let ADS = [], adIdx = 0, currentPubId = null;
+
+async function loadAds() {
+  if (USER_PLAN === 'pro') { closeAdBar(); return; }
+  try {
+    const res = await fetch(HF_BACKEND + '/publicites');
+    const data = await res.json();
+    ADS = data.data || [];
+  } catch(e) {}
+  if (!ADS.length) {
+    ADS = [
+      {id:'1', texte:'📱 Mobilis Entreprises — La connexion qui propulse votre business', url:'https://mobilis.dz'},
+      {id:'2', texte:'🌐 Djezzy Business — Solutions adaptées à votre entreprise', url:'https://djezzy.dz'},
+      {id:'3', texte:'🛡️ AAT Assurances — Protégez votre activité professionnelle', url:'https://aat.dz'},
+      {id:'4', texte:'🏦 CPA Banque — Ouvrez votre compte pro en ligne', url:'https://cpa.dz'},
+      {id:'5', texte:'📊 Formation Excel Algérie — Maîtrisez votre comptabilité', url:'#'},
+    ];
+  }
+  showNextAd();
+  setInterval(showNextAd, 8000);
+}
+
+function showNextAd() {
+  const ad = ADS[adIdx % ADS.length];
+  currentPubId = ad?.id || null;
+  const el = document.getElementById('adText');
+  if (!el) return;
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = ad.texte; el.style.opacity = '1'; }, 300);
+  adIdx++;
+}
+
+function clicPub() {
+  if (currentPubId && HF_BACKEND) {
+    fetch(HF_BACKEND + '/publicites/' + currentPubId + '/clic', {method:'POST'}).catch(()=>{});
+  }
+}
+
+function closeAdBar() {
+  const bar = document.getElementById('adBar');
+  if (bar) bar.classList.add('hidden');
+  document.getElementById('sidebar').classList.add('no-ad');
+}
+
+function copyPayInfo() {
+  const ent = getEnt();
+  const ccp = ent.banque?.ccp || '123456789';
+  const key = ent.banque?.ccp_key || '78';
+  const txt = `NexaFlow Pro — 990 DA/mois\nCCP: ${ccp} / Clé ${key}\nEnvoyer preuve à: nexaflow.pro@gmail.com`;
+  navigator.clipboard.writeText(txt).then(() => toast('Infos de paiement copiées ✅', 'success'));
+}
+
+function updateCCPDisplay() {
+  const ent = getEnt();
+  const el  = document.getElementById('ccpDisplay');
+  if (el) el.textContent = `CCP: ${ent.banque?.ccp||'123456789'} / Clé ${ent.banque?.ccp_key||'78'}`;
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+const fmt  = n => (n||0).toLocaleString('fr-DZ',{maximumFractionDigits:0}) + ' DA';
+const fmtD = d => { if(!d)return'—'; try{return new Date(d).toLocaleDateString('fr-DZ');}catch{return d;} };
+const v    = id => { const el=document.getElementById(id); return el?el.value.trim()||null:null; };
+const ini  = s => (s||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+const COLORS = ['#4f6ef7','#22c55e','#fbbf24','#a78bfa','#f43f5e','#22d3ee'];
+const clr  = s => { let h=0; for(const c of(s||''))h+=c.charCodeAt(0); return COLORS[h%COLORS.length]; };
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function stBadge(s) {
+  const m = {
+    payee:    '<span class="sb s-pay">Payée</span>',
+    envoyee:  '<span class="sb s-env">Envoyée</span>',
+    en_retard:'<span class="sb s-ret">En retard</span>',
+    brouillon:'<span class="sb s-bro">Brouillon</span>',
+    annulee:  '<span class="sb s-ann">Annulée</span>',
+    actif:    '<span class="sb s-act">Actif</span>',
+    inactif:  '<span class="sb s-ann">Inactif</span>',
+    prospect: '<span class="sb s-pro">Prospect</span>',
+    envoye:   '<span class="sb s-env">Envoyé</span>',
+    accepte:  '<span class="sb s-pay">Accepté</span>',
+    converti: '<span class="sb s-act">Converti</span>',
+  };
+  return m[s] || `<span class="sb s-bro">${s||'—'}</span>`;
+}
+
+function getEnt() {
+  try { return JSON.parse(localStorage.getItem('nxf_ent')||'{}'); } catch { return {}; }
+}
+
+function loadEntreprise() {
+  const ent = getEnt();
+  [['eRs','raison_sociale'],['eRc','rc'],['eNif','nif'],['eNis','nis'],
+   ['eTel','telephone'],['eEmail','email'],['eAdr','adresse'],['eAct','activite']
+  ].forEach(([id,k]) => { const el=document.getElementById(id); if(el) el.value=ent[k]||''; });
+}
+
+function saveEntreprise() {
+  const ent = getEnt();
+  [['eRs','raison_sociale'],['eRc','rc'],['eNif','nif'],['eNis','nis'],
+   ['eTel','telephone'],['eEmail','email'],['eAdr','adresse'],['eAct','activite']
+  ].forEach(([id,k]) => { const el=document.getElementById(id); if(el) ent[k]=el.value.trim(); });
+  localStorage.setItem('nxf_ent', JSON.stringify(ent));
+  toast('Entreprise sauvegardée ✅', 'success');
+}
+
+function loadBanque() {
+  const ent = getEnt();
+  const bk  = ent.banque || {};
+  [['bNom','nom'],['bRib','rib'],['bCompte','compte'],
+   ['bCode','code_banque'],['bCcp','ccp'],['bCcpKey','ccp_key']
+  ].forEach(([id,k]) => { const el=document.getElementById(id); if(el) el.value=bk[k]||''; });
+  updateCCPDisplay();
+}
+
+function saveBanque() {
+  const ent = getEnt();
+  ent.banque = ent.banque || {};
+  [['bNom','nom'],['bRib','rib'],['bCompte','compte'],
+   ['bCode','code_banque'],['bCcp','ccp'],['bCcpKey','ccp_key']
+  ].forEach(([id,k]) => { const el=document.getElementById(id); if(el) ent.banque[k]=el.value.trim(); });
+  localStorage.setItem('nxf_ent', JSON.stringify(ent));
+  updateCCPDisplay();
+  toast('Infos bancaires sauvegardées ✅', 'success');
+}
+
+function initDates() {
+  const t   = new Date().toISOString().split('T')[0];
+  const t30 = new Date(Date.now()+30*864e5).toISOString().split('T')[0];
+  ['f_date','d_date','pay_dt'].forEach(id => { const el=document.getElementById(id); if(el) el.value=t; });
+  ['f_ech','d_val'].forEach(id => { const el=document.getElementById(id); if(el) el.value=t30; });
+}
+
+// Lines helpers
+function mkLine(fn, cont) {
+  const d = document.createElement('div');
+  d.className = 'il';
+  d.innerHTML = `<input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="${fn}()"><input type="number" value="0" min="0" oninput="${fn}()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'${cont}','${fn}')" style="cursor:pointer;color:var(--t3);font-size:14px;text-align:center">✕</span>`;
+  return d;
+}
+const addFacLine = () => document.getElementById('fLines').appendChild(mkLine('calcFac','fLines'));
+const addDevLine = () => document.getElementById('dLines').appendChild(mkLine('calcDev','dLines'));
+const addEFLine  = () => document.getElementById('efLines')?.appendChild(mkLine('calcEF','efLines'));
+
+function rmLine(el, cont, fn) {
+  if (document.querySelectorAll(`#${cont} .il`).length > 1) {
+    el.closest('.il').remove();
+    if (window[fn]) window[fn]();
+  }
+}
+
+function resetLines(id) {
+  const fn = id === 'fLines' ? 'calcFac' : 'calcDev';
+  document.getElementById(id).innerHTML = `<div class="il"><input type="text" placeholder="Article / Service"><input type="number" value="1" min="0.01" step="0.01" oninput="${fn}()"><input type="number" value="0" min="0" oninput="${fn}()"><input type="text" value="0 DA" readonly><span onclick="rmLine(this,'${id}','${fn}')" style="cursor:pointer;color:var(--t3);font-size:14px;text-align:center">✕</span></div>`;
+}
+
+function calcLines(cid, hid, tid, ttcid) {
+  let ht = 0, tva = 0;
+  document.querySelectorAll(`#${cid} .il`).forEach(r => {
+    const ins = r.querySelectorAll('input');
+    const q = parseFloat(ins[1].value)||0, p = parseFloat(ins[2].value)||0, t = q*p;
+    ins[3].value = t.toLocaleString('fr-DZ') + ' DA';
+    ht += t; tva += t * .19;
+  });
+  document.getElementById(hid).textContent   = fmt(ht);
+  document.getElementById(tid).textContent   = fmt(tva);
+  document.getElementById(ttcid).textContent = fmt(ht + tva);
+}
+
+const calcFac = () => calcLines('fLines','f_ht','f_tva','f_ttc');
+const calcDev = () => calcLines('dLines','d_ht','d_tva','d_ttc');
+const calcEF  = () => calcLines('efLines','ef_ht','ef_tva','ef_ttc');
+
+function getLines(cid) {
+  return [...document.querySelectorAll(`#${cid} .il`)].map(r => {
+    const ins = r.querySelectorAll('input');
+    return {designation: ins[0].value.trim(), quantite: parseFloat(ins[1].value)||1, prix_unitaire: parseFloat(ins[2].value)||0, tva: 19, unite: 'unité'};
+  }).filter(l => l.designation);
+}
+
+function calcTot(lignes) {
+  let ht = 0, tva = 0;
+  lignes.forEach(l => {
+    const lht  = l.quantite * l.prix_unitaire;
+    const ltva = lht * ((l.tva||19)/100);
+    l.montant_ht  = Math.round(lht*100)/100;
+    l.montant_ttc = Math.round((lht+ltva)*100)/100;
+    ht += lht; tva += ltva;
+  });
+  return { sous_total: Math.round(ht*100)/100, montant_ht: Math.round(ht*100)/100, montant_tva: Math.round(tva*100)/100, montant_ttc: Math.round((ht+tva)*100)/100 };
+}
+
+async function genNum(table, prefix) {
+  try {
+    const d = await sb(`${table}?select=numero&order=numero.desc&limit=1`);
+    if (d.length) {
+      const last = d[0].numero?.replace(prefix,'');
+      if (!isNaN(last)) return prefix + String(parseInt(last)+1).padStart(4,'0');
+    }
+  } catch(e) {}
+  return prefix + '0001';
+}
+
+async function fillCliSel(ids=[]) {
+  try {
+    const data = await sb('clients?statut=eq.actif&order=raison_sociale&select=id,raison_sociale');
+    ids.forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">-- Sélectionner --</option>' + data.map(c => `<option value="${c.id}">${c.raison_sociale}</option>`).join('');
+      if (cur) sel.value = cur;
+    });
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+async function loadDash() {
+  try {
+    const [facs, devs, cls] = await Promise.all([
+      sb('factures?select=id,numero,montant_ttc,statut,date_facture,clients(raison_sociale)&order=created_at.desc&limit=8'),
+      sb('devis?select=id&statut=in.(brouillon,envoye)'),
+      sb('clients?order=created_at.desc&limit=5&select=id,raison_sociale,ville,statut,created_at'),
+    ]);
+    const payees = facs.filter(f => f.statut === 'payee');
+    const ca     = payees.reduce((s,f) => s+f.montant_ttc, 0);
+    const att    = facs.filter(f => ['envoyee','en_retard'].includes(f.statut)).reduce((s,f) => s+f.montant_ttc, 0);
+
+    document.getElementById('dashKpis').innerHTML = `
+      <div class="kcard bl"><div class="kcard-ico">💰</div><div class="kcard-val">${fmt(ca)}</div><div class="kcard-label">Chiffre d'affaires</div><span class="kcard-delta up">↑ +12.5% vs semaine</span></div>
+      <div class="kcard gr"><div class="kcard-ico">🧾</div><div class="kcard-val">${facs.length}</div><div class="kcard-label">Factures</div><span class="kcard-delta up">↑ +${payees.length} payées</span></div>
+      <div class="kcard am"><div class="kcard-ico">👥</div><div class="kcard-val">${cls.length}</div><div class="kcard-label">Clients</div><span class="kcard-delta up">↑ +2 cette semaine</span></div>
+      <div class="kcard rd"><div class="kcard-ico">💳</div><div class="kcard-val">${fmt(att)}</div><div class="kcard-label">En attente</div></div>`;
+
+    // Chart
+    renderRevenueChart(facs);
+
+    // Donut
+    document.getElementById('dFac').textContent = fmt(ca * .6);
+    document.getElementById('dDev').textContent = fmt(ca * .25);
+    document.getElementById('dPay').textContent = fmt(ca * .15);
+
+    // Factures table
+    document.getElementById('dashFac').innerHTML = facs.length
+      ? `<table><thead><tr><th>N°</th><th>Client</th><th>Montant</th><th>Statut</th></tr></thead><tbody>
+         ${facs.map(f => `<tr style="cursor:pointer" onclick="viewFacture('${f.id}')">
+           <td style="color:var(--blue);font-weight:600">${f.numero}</td>
+           <td>${f.clients?.raison_sociale||'—'}</td>
+           <td style="font-weight:600">${fmt(f.montant_ttc)}</td>
+           <td>${stBadge(f.statut)}</td>
+         </tr>`).join('')}</tbody></table>`
+      : '<div class="empty"><div class="empty-ico">🧾</div><div class="empty-t">Aucune facture</div><button class="btn btn-primary btn-sm" onclick="openModal(\'moFac\')">Créer</button></div>';
+
+    // Clients table
+    document.getElementById('dashCli').innerHTML = cls.length
+      ? `<table><thead><tr><th>Entreprise</th><th>Ville</th><th>Statut</th></tr></thead><tbody>
+         ${cls.map(c => `<tr style="cursor:pointer" onclick="viewClient('${c.id}')">
+           <td style="font-weight:600">${c.raison_sociale}</td>
+           <td style="color:var(--t2)">${c.ville||'—'}</td>
+           <td>${stBadge(c.statut)}</td>
+         </tr>`).join('')}</tbody></table>`
+      : '<div class="empty"><div class="empty-ico">👥</div><div class="empty-t">Aucun client</div><button class="btn btn-primary btn-sm" onclick="openModal(\'moCli\')">Créer</button></div>';
+
+    // Donut badges
+    document.getElementById('dFac').textContent = payees.length + ' factures';
+    document.getElementById('dDev').textContent = devs.length + ' devis';
+  } catch(e) { console.error('Dashboard error:', e); }
+}
+
+function renderRevenueChart(facs) {
+  const el = document.getElementById('revenueChart');
+  if (!el) return;
+  const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const data = Array(7).fill(0);
+  facs.forEach(f => {
+    if (!f.date_facture) return;
+    const d = new Date(f.date_facture).getDay();
+    data[d] = (data[d]||0) + (f.montant_ttc||0);
+  });
+  const maxVal = Math.max(...data, 1);
+  el.innerHTML = data.map((v, i) => `
+    <div class="chart-col">
+      <div class="chart-bar rev" style="height:${Math.round((v/maxVal)*115)}px" title="${fmt(v)}"></div>
+      <div class="chart-lbl">${days[i]}</div>
+    </div>`).join('');
+}
+
+async function loadBadges() {
+  try {
+    const [a, b, c] = await Promise.all([
+      sb('clients?select=id&statut=eq.actif'),
+      sb('factures?select=id&statut=in.(envoyee,en_retard)'),
+      sb('devis?select=id&statut=in.(brouillon,envoye)'),
+    ]);
+    document.getElementById('nbClients').textContent = a.length || '';
+    document.getElementById('nbFac').textContent     = b.length || '';
+    document.getElementById('nbDev').textContent     = c.length || '';
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+// CLIENTS
+// ══════════════════════════════════════════
+async function loadClients() {
+  try {
+    let q = 'clients?order=created_at.desc';
+    if (cliFilter.statut)  q += `&statut=eq.${cliFilter.statut}`;
+    if (cliFilter.search)  q += `&raison_sociale=ilike.*${encodeURIComponent(cliFilter.search)}*`;
+    q += `&offset=${cliFilter.offset}&limit=${PS}`;
+    const d = await sb(q);
+    document.getElementById('cliSub').textContent   = `${d.length} clients`;
+    document.getElementById('cliCount').textContent = `${d.length} résultat(s)`;
+    document.getElementById('cliPgInfo').textContent = `Page ${Math.floor(cliFilter.offset/PS)+1}`;
+    if (!d.length) {
+      document.getElementById('cliTbl').innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-ico">👤</div><div class="empty-t">Aucun client</div><button class="btn btn-primary" onclick="openModal('moCli')">+ Nouveau client</button></div></td></tr>`;
+      return;
+    }
+    document.getElementById('cliTbl').innerHTML = d.map(c => `
+      <tr>
+        <td><div class="ac"><div class="ava-sm" style="background:${clr(c.raison_sociale)}">${ini(c.raison_sociale)}</div><div><div style="font-weight:600">${c.raison_sociale}</div><div style="font-size:11px;color:var(--t3)">${c.rc||''}</div></div></div></td>
+        <td><div>${c.nom_contact||'—'}</div><div style="font-size:11px;color:var(--t3)">${c.email||''}</div></td>
+        <td>${c.ville||'—'}</td>
+        <td>${stBadge(c.statut)}</td>
+        <td style="color:var(--t2);font-size:12px">${fmtD(c.created_at)}</td>
+        <td><div class="ra">
+          <div class="ab" onclick="viewClient('${c.id}')" title="Voir">👁️</div>
+          <div class="ab" onclick="editClient('${c.id}')" title="Modifier">✏️</div>
+          <div class="ab" onclick="dlClientPDF('${c.id}')" title="PDF">📄</div>
+          <div class="ab" onclick="delClient('${c.id}')" title="Désactiver">🗑️</div>
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur clients: ' + e.message, 'error'); }
+}
+
+const searchClients = q => { cliFilter.search=q; cliFilter.offset=0; loadClients(); };
+const filterCliSt   = s => { cliFilter.statut=s; cliFilter.offset=0; loadClients(); };
+const cliPg = d => { cliFilter.offset=Math.max(0,cliFilter.offset+d*PS); loadClients(); };
+
+async function createClient() {
+  const rs = v('c_rs');
+  if (!rs) { toast('Raison sociale obligatoire', 'error'); return; }
+  try {
+    await sb('clients', { method:'POST', body:{
+      raison_sociale:rs, rc:v('c_rc'), nif:v('c_nif'), nis:v('c_nis'),
+      activite:v('c_act'), nom_contact:v('c_nom'), telephone:v('c_tel'),
+      email:v('c_email'), adresse:v('c_adr'),
+      ville:document.getElementById('c_ville').value,
+      statut:document.getElementById('c_st').value,
+      notes:v('c_notes')
+    }});
+    toast('Client créé ✅', 'success');
+    closeModal('moCli');
+    ['c_rs','c_rc','c_nif','c_nis','c_act','c_nom','c_tel','c_email','c_adr','c_notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    loadClients(); loadBadges();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+async function viewClient(id) {
+  currentClientId = id;
+  openModal('moViewCli');
+  document.getElementById('vcBody').innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  try {
+    const [c, facs] = await Promise.all([
+      sb(`clients?id=eq.${id}`).then(d=>d[0]),
+      sb(`factures?client_id=eq.${id}&select=numero,date_facture,montant_ttc,statut&order=date_facture.desc&limit=8`)
+    ]);
+    document.getElementById('vcTitle').textContent = c.raison_sociale;
+    const caTotal = facs.filter(f=>f.statut==='payee').reduce((s,f)=>s+f.montant_ttc,0);
+    document.getElementById('vcBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="background:var(--s2);border-radius:9px;padding:14px">
+          <div style="font-size:10px;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Informations</div>
+          ${[['RC',c.rc],['NIF',c.nif],['Activité',c.activite],['Statut',stBadge(c.statut)]].map(([k,v2])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${v2||'—'}</span></div>`).join('')}
+        </div>
+        <div style="background:var(--s2);border-radius:9px;padding:14px">
+          <div style="font-size:10px;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Contact</div>
+          ${[['Contact',c.nom_contact],['Tél',c.telephone],['Email',c.email],['Ville',c.ville]].map(([k,v2])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${v2||'—'}</span></div>`).join('')}
+        </div>
+      </div>
+      <div style="background:var(--s2);border-radius:9px;padding:14px;margin-bottom:14px;display:flex;gap:24px">
+        <div><div style="font-size:11px;color:var(--t3)">CA TOTAL</div><div style="font-weight:800;font-size:20px;color:var(--green)">${fmt(caTotal)}</div></div>
+        <div><div style="font-size:11px;color:var(--t3)">FACTURES</div><div style="font-weight:800;font-size:20px;color:var(--blue)">${facs.length}</div></div>
+      </div>
+      ${facs.length ? `<table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:8px 0;font-size:11px;color:var(--t3)">N°</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Date</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Montant</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Statut</th></tr></thead><tbody>
+        ${facs.map(f=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--blue);font-weight:600;font-size:13px">${f.numero}</td><td style="padding:8px 0;font-size:13px">${fmtD(f.date_facture)}</td><td style="padding:8px 0;font-weight:600;font-size:13px">${fmt(f.montant_ttc)}</td><td style="padding:8px 0">${stBadge(f.statut)}</td></tr>`).join('')}
+        </tbody></table>` : '<div style="text-align:center;padding:20px;color:var(--t3)">Aucune facture</div>'}`;
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function editClient(id) {
+  currentClientId = id;
+  try {
+    const c = (await sb(`clients?id=eq.${id}`))[0];
+    [['ec_rs','raison_sociale'],['ec_rc','rc'],['ec_nif','nif'],['ec_nis','nis'],
+     ['ec_act','activite'],['ec_nom','nom_contact'],['ec_tel','telephone'],
+     ['ec_email','email'],['ec_adr','adresse'],['ec_notes','notes']
+    ].forEach(([el,k]) => { const e=document.getElementById(el); if(e) e.value=c[k]||''; });
+    document.getElementById('ec_ville').value = c.ville||'Oran';
+    document.getElementById('ec_st').value    = c.statut||'actif';
+    closeModal('moViewCli'); openModal('moEditCli');
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function saveEditClient() {
+  const rs = v('ec_rs');
+  if (!rs) { toast('Raison sociale obligatoire', 'error'); return; }
+  try {
+    await sb(`clients?id=eq.${currentClientId}`, {method:'PATCH', prefer:'return=minimal', body:{
+      raison_sociale:rs, rc:v('ec_rc'), nif:v('ec_nif'), nis:v('ec_nis'),
+      activite:v('ec_act'), nom_contact:v('ec_nom'), telephone:v('ec_tel'),
+      email:v('ec_email'), adresse:v('ec_adr'),
+      ville:document.getElementById('ec_ville').value,
+      statut:document.getElementById('ec_st').value, notes:v('ec_notes')
+    }});
+    toast('Client modifié ✅', 'success'); closeModal('moEditCli'); loadClients();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+async function delClient(id) {
+  if (!confirm('Désactiver ce client ?')) return;
+  try {
+    await sb(`clients?id=eq.${id}`, {method:'PATCH', prefer:'return=minimal', body:{statut:'inactif'}});
+    toast('Client désactivé', 'info'); loadClients(); loadBadges();
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function exportClientsExcel() {
+  try {
+    const d = await sb('clients?order=raison_sociale');
+    dlXLSX(d.map(c=>({'Raison sociale':c.raison_sociale,'RC':c.rc||'','NIF':c.nif||'','Contact':c.nom_contact||'','Téléphone':c.telephone||'','Email':c.email||'','Ville':c.ville||'','Statut':c.statut})), 'Clients_NexaFlow');
+    toast('Excel téléchargé ✅', 'success');
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+// ══════════════════════════════════════════
+// FACTURES
+// ══════════════════════════════════════════
+async function loadFactures() {
+  try {
+    let q = 'factures?select=*,clients(raison_sociale)&order=created_at.desc';
+    if (facFilter.statut) q += `&statut=eq.${facFilter.statut}`;
+    if (facFilter.search) q += `&numero=ilike.*${encodeURIComponent(facFilter.search)}*`;
+    q += `&offset=${facFilter.offset}&limit=${PS}`;
+    const [d, all] = await Promise.all([sb(q), sb('factures?select=id,statut')]);
+    document.getElementById('fcAll').textContent = all.length;
+    document.getElementById('fcPay').textContent = all.filter(f=>f.statut==='payee').length;
+    document.getElementById('fcAtt').textContent = all.filter(f=>f.statut==='envoyee').length;
+    document.getElementById('fcRet').textContent = all.filter(f=>f.statut==='en_retard').length;
+    document.getElementById('facSub').textContent     = `${d.length} factures`;
+    document.getElementById('facPgInfo').textContent  = `Page ${Math.floor(facFilter.offset/PS)+1}`;
+    if (!d.length) {
+      document.getElementById('facTbl').innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-ico">🧾</div><div class="empty-t">Aucune facture</div><button class="btn btn-primary" onclick="openModal('moFac')">+ Nouvelle facture</button></div></td></tr>`;
+      return;
+    }
+    document.getElementById('facTbl').innerHTML = d.map(f => `
+      <tr>
+        <td style="color:var(--blue);font-weight:600;cursor:pointer" onclick="viewFacture('${f.id}')">${f.numero}</td>
+        <td>${f.clients?.raison_sociale||'—'}</td>
+        <td style="color:var(--t2);font-size:12px">${fmtD(f.date_facture)}</td>
+        <td style="color:var(--t2);font-size:12px">${fmtD(f.date_echeance)}</td>
+        <td style="font-weight:700">${fmt(f.montant_ttc)}</td>
+        <td>${stBadge(f.statut)}</td>
+        <td><div class="ra">
+          <div class="ab" onclick="viewFacture('${f.id}')" title="Voir">👁️</div>
+          <div class="ab" onclick="dupFac('${f.id}')" title="Dupliquer">📋</div>
+          <div class="ab" onclick="openPay('${f.id}','${f.montant_ttc}')" title="Paiement">💳</div>
+          <div class="ab" onclick="dlPDF('${f.id}')" title="PDF">📄</div>
+          <div class="ab" onclick="exportAvecModele('${f.id}')" title="Excel Pro">📊</div>
+          <div class="ab" onclick="annulerFac('${f.id}')" title="Annuler">🗑️</div>
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur factures: ' + e.message, 'error'); }
+}
+
+const filterFacSt = s => { facFilter.statut=s; facFilter.offset=0; loadFactures(); };
+const searchFac   = s => { facFilter.search=s; facFilter.offset=0; loadFactures(); };
+const facPg = d => { facFilter.offset=Math.max(0,facFilter.offset+d*PS); loadFactures(); };
+
+async function createFacture(forceSt) {
+  const cli = document.getElementById('f_cli').value;
+  if (!cli) { toast('Sélectionnez un client', 'error'); return; }
+  const lignes = getLines('fLines');
+  if (!lignes.length) { toast('Ajoutez au moins une ligne', 'error'); return; }
+  try {
+    const tot = calcTot(lignes);
+    const num = await genNum('factures','FAC-');
+    const st  = forceSt || document.getElementById('f_st').value;
+    const fac = await sb('factures', {method:'POST', body:{
+      numero:num, client_id:cli, statut:st,
+      date_facture:v('f_date'), date_echeance:v('f_ech'),
+      objet:v('f_obj'), notes:v('f_notes'), ...tot
+    }});
+    const fid = fac[0].id;
+    await sb('lignes_facture', {method:'POST', body: lignes.map((l,i)=>({...l, facture_id:fid, ordre:i}))});
+    toast(`Facture ${num} créée ✅`, 'success');
+    closeModal('moFac'); resetLines('fLines'); calcFac();
+    loadFactures(); loadBadges(); loadDash();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+async function viewFacture(id) {
+  currentFacId = id;
+  openModal('moViewFac');
+  document.getElementById('vfBody').innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  try {
+    const [fac, lignes, paies] = await Promise.all([
+      sb(`factures?id=eq.${id}&select=*,clients(*)`).then(d=>d[0]),
+      sb(`lignes_facture?facture_id=eq.${id}&order=ordre`),
+      sb(`paiements?facture_id=eq.${id}&order=date_paiement.desc`)
+    ]);
+    document.getElementById('vfTitle').textContent = `Facture ${fac.numero}`;
+    const totalPaye = paies.reduce((s,p)=>s+p.montant, 0);
+    document.getElementById('vfActions').innerHTML = `
+      <button class="btn btn-ghost btn-xs" onclick="dupFac('${id}')">📋</button>
+      <button class="btn btn-success btn-xs" onclick="openPay('${id}','${fac.montant_ttc}')">💳 Paiement</button>
+      <button class="btn btn-danger btn-xs" onclick="dlPDF('${id}')">📄 PDF</button>
+      <button class="btn btn-ghost btn-xs" onclick="exportAvecModele('${id}')">📊 Excel</button>`;
+    document.getElementById('vfBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="background:var(--s2);border-radius:9px;padding:14px">
+          ${[['Numéro',`<span style="color:var(--blue);font-weight:700">${fac.numero}</span>`],['Statut',stBadge(fac.statut)],['Date',fmtD(fac.date_facture)],['Échéance',fmtD(fac.date_echeance)],['Objet',fac.objet||'—']].map(([k,v2])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${v2}</span></div>`).join('')}
+        </div>
+        <div style="background:var(--s2);border-radius:9px;padding:14px">
+          ${[['Client',`<strong>${fac.clients?.raison_sociale||'—'}</strong>`],['Contact',fac.clients?.nom_contact||'—'],['Tél',fac.clients?.telephone||'—'],['Email',fac.clients?.email||'—']].map(([k,v2])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${k}</span><span>${v2}</span></div>`).join('')}
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:8px 0;font-size:11px;color:var(--t3)">Désignation</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Qté</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">P.U. HT</th><th style="padding:8px 0;font-size:11px;color:var(--t3)">Total HT</th></tr></thead>
+        <tbody>${lignes.map(l=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;font-size:13px">${l.designation}</td><td style="padding:8px 0;font-size:13px">${l.quantite}</td><td style="padding:8px 0;font-size:13px">${fmt(l.prix_unitaire)}</td><td style="padding:8px 0;font-weight:600;font-size:13px">${fmt(l.montant_ht)}</td></tr>`).join('')}</tbody>
+      </table>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">
+        <div class="tr"><span class="tl">Sous-total HT</span><span class="tv">${fmt(fac.montant_ht)}</span></div>
+        <div class="tr"><span class="tl">TVA 19%</span><span class="tv">${fmt(fac.montant_tva)}</span></div>
+        <div class="tr grand"><span class="tl">Total TTC</span><span class="tv" style="color:var(--blue)">${fmt(fac.montant_ttc)}</span></div>
+      </div>
+      ${paies.length ? `<div style="background:var(--s2);border-radius:9px;padding:14px">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Paiements reçus</div>
+        ${paies.map(p=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--t2)">${fmtD(p.date_paiement)} · ${p.mode}</span><span style="color:var(--green);font-weight:600">${fmt(p.montant)}</span></div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:var(--t2)">Reste à payer</span><span style="color:${(fac.montant_ttc-totalPaye)>0?'var(--red)':'var(--green)'};font-weight:700">${fmt(Math.max(0,fac.montant_ttc-totalPaye))}</span></div>
+      </div>` : ''}`;
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function annulerFac(id) {
+  if (!confirm('Annuler cette facture ?')) return;
+  try { await sb(`factures?id=eq.${id}`, {method:'PATCH', prefer:'return=minimal', body:{statut:'annulee'}}); toast('Facture annulée', 'info'); loadFactures(); } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function dupFac(id) {
+  try {
+    const [fac, lignes] = await Promise.all([sb(`factures?id=eq.${id}`).then(d=>d[0]), sb(`lignes_facture?facture_id=eq.${id}&order=ordre`)]);
+    const num = await genNum('factures','FAC-');
+    const nf  = await sb('factures', {method:'POST', body:{...fac, id:undefined, numero:num, statut:'brouillon', date_facture:new Date().toISOString().split('T')[0], created_at:undefined, updated_at:undefined}});
+    const nfid = nf[0].id;
+    if (lignes.length) await sb('lignes_facture', {method:'POST', body:lignes.map(l=>({...l, id:undefined, facture_id:nfid}))});
+    toast(`Dupliquée → ${num} ✅`, 'success'); loadFactures();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+function openPay(id, montant) {
+  currentPayFacId = id;
+  document.getElementById('pay_mt').value = parseFloat(montant).toFixed(0);
+  closeModal('moViewFac'); openModal('moPay');
+}
+
+async function savePaiement() {
+  const mt = parseFloat(document.getElementById('pay_mt').value)||0;
+  if (!mt) { toast('Montant invalide', 'error'); return; }
+  try {
+    await sb('paiements', {method:'POST', body:{
+      facture_id:currentPayFacId, montant:mt,
+      date_paiement:document.getElementById('pay_dt').value,
+      mode:document.getElementById('pay_mode').value, reference:v('pay_ref')
+    }});
+    const fac  = (await sb(`factures?id=eq.${currentPayFacId}&select=montant_ttc`))[0];
+    const paies = await sb(`paiements?facture_id=eq.${currentPayFacId}&select=montant`);
+    const total = paies.reduce((s,p)=>s+p.montant, 0);
+    if (total >= fac.montant_ttc)
+      await sb(`factures?id=eq.${currentPayFacId}`, {method:'PATCH', prefer:'return=minimal', body:{statut:'payee'}});
+    await sb('tresorerie', {method:'POST', body:{type:'entree', montant:mt, description:'Paiement facture', reference:v('pay_ref'), facture_id:currentPayFacId, date_mouvement:document.getElementById('pay_dt').value, categorie:'Encaissement'}});
+    toast('Paiement enregistré ✅', 'success'); closeModal('moPay'); loadFactures(); loadBadges();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════
+// DEVIS
+// ══════════════════════════════════════════
+async function loadDevis() {
+  try {
+    const d = await sb('devis?select=*,clients(raison_sociale)&order=created_at.desc');
+    if (!d.length) { document.getElementById('devTbl').innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-ico">📋</div><div class="empty-t">Aucun devis</div><button class="btn btn-primary" onclick="openModal('moDev')">+ Nouveau</button></div></td></tr>`; return; }
+    document.getElementById('devTbl').innerHTML = d.map(dv=>`
+      <tr>
+        <td style="color:var(--blue);font-weight:600">${dv.numero}</td>
+        <td>${dv.clients?.raison_sociale||'—'}</td>
+        <td style="color:var(--t2)">${dv.objet||'—'}</td>
+        <td style="color:var(--t2);font-size:12px">${fmtD(dv.date_devis)}</td>
+        <td style="color:var(--t2);font-size:12px">${fmtD(dv.date_validite)}</td>
+        <td style="font-weight:700">${fmt(dv.montant_ttc)}</td>
+        <td>${stBadge(dv.statut)}</td>
+        <td><div class="ra">
+          <div class="ab" onclick="convDev('${dv.id}')" title="Convertir en facture">🧾</div>
+          <div class="ab" onclick="dlDevPDF('${dv.id}')" title="PDF">📄</div>
+          <div class="ab" onclick="delDev('${dv.id}')" title="Supprimer">🗑️</div>
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur devis', 'error'); }
+}
+
+async function createDevis() {
+  const cli = document.getElementById('d_cli').value;
+  if (!cli) { toast('Sélectionnez un client', 'error'); return; }
+  const lignes = getLines('dLines');
+  if (!lignes.length) { toast('Ajoutez au moins une ligne', 'error'); return; }
+  try {
+    const tot = calcTot(lignes);
+    const num = await genNum('devis','DEV-');
+    const dev = await sb('devis', {method:'POST', body:{numero:num, client_id:cli, date_devis:v('d_date'), date_validite:v('d_val'), statut:document.getElementById('d_st').value, objet:v('d_obj'), ...tot}});
+    await sb('lignes_devis', {method:'POST', body:lignes.map((l,i)=>({...l, devis_id:dev[0].id, ordre:i}))});
+    toast(`Devis ${num} créé ✅`, 'success'); closeModal('moDev'); resetLines('dLines'); calcDev(); loadDevis(); loadBadges();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+async function convDev(id) {
+  if (!confirm('Convertir ce devis en facture ?')) return;
+  try {
+    const dev    = (await sb(`devis?id=eq.${id}`))[0];
+    const lignes = await sb(`lignes_devis?devis_id=eq.${id}&order=ordre`);
+    const num    = await genNum('factures','FAC-');
+    const fac    = await sb('factures', {method:'POST', body:{numero:num, client_id:dev.client_id, date_facture:new Date().toISOString().split('T')[0], statut:'brouillon', objet:dev.objet, sous_total:dev.sous_total, montant_ht:dev.montant_ht, montant_tva:dev.montant_tva, montant_ttc:dev.montant_ttc}});
+    const fid    = fac[0].id;
+    if (lignes.length) await sb('lignes_facture', {method:'POST', body:lignes.map(l=>{const nl={...l};delete nl.id;delete nl.devis_id;nl.facture_id=fid;return nl;})});
+    await sb(`devis?id=eq.${id}`, {method:'PATCH', prefer:'return=minimal', body:{statut:'converti'}});
+    toast(`Devis converti → Facture ${num} ✅`, 'success'); loadDevis(); loadFactures(); loadBadges();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+async function delDev(id) {
+  if (!confirm('Supprimer ce devis ?')) return;
+  try {
+    await sb(`lignes_devis?devis_id=eq.${id}`, {method:'DELETE', prefer:'return=minimal'});
+    await sb(`devis?id=eq.${id}`, {method:'DELETE', prefer:'return=minimal'});
+    toast('Devis supprimé', 'info'); loadDevis(); loadBadges();
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function exportDevisExcel() {
+  const d = await sb('devis?select=*,clients(raison_sociale)&order=date_devis.desc');
+  dlXLSX(d.map(dv=>({'N° Devis':dv.numero,'Client':dv.clients?.raison_sociale||'—','Objet':dv.objet||'','Date':fmtD(dv.date_devis),'Validité':fmtD(dv.date_validite),'HT':dv.montant_ht,'TVA':dv.montant_tva,'TTC':dv.montant_ttc,'Statut':dv.statut})), 'Devis_NexaFlow');
+  toast('Excel téléchargé ✅', 'success');
+}
+
+// ══════════════════════════════════════════
+// STOCK
+// ══════════════════════════════════════════
+async function loadStock(alertOnly=false) {
+  try {
+    let data = await sb('produits?actif=eq.true&order=designation');
+    if (alertOnly) data = data.filter(p => p.stock_actuel <= p.stock_min);
+    document.getElementById('stSub').textContent = `${data.length} produits · ${data.filter(p=>p.stock_actuel<=p.stock_min).length} alertes`;
+    const clrSt = p => p.stock_actuel <= p.stock_min ? 'var(--red)' : p.stock_actuel < (p.stock_max||1)*.4 ? 'var(--amber)' : 'var(--green)';
+    document.getElementById('stGrid').innerHTML = data.length
+      ? data.map(p=>`<div class="scard"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="scard-ico">📦</div><div><div style="font-weight:600;font-size:13px">${p.designation}</div><div style="font-size:11px;color:var(--t3)">${p.reference||'—'}</div></div></div><div style="font-weight:800;font-size:22px;color:${clrSt(p)}">${p.stock_actuel} <span style="font-size:12px;font-weight:400;color:var(--t2)">${p.unite||'u'}</span></div><div style="font-size:11px;color:var(--t2);margin-bottom:5px">PV: ${fmt(p.prix_vente)}</div><div class="pbar"><div class="pfill" style="width:${Math.min(100,Math.round((p.stock_actuel/(p.stock_max||1))*100))}%;background:${clrSt(p)}"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px"><span>Min: ${p.stock_min}</span><span>Max: ${p.stock_max}</span></div><div style="display:flex;gap:5px;margin-top:10px"><div class="ab" onclick="mvtStock('${p.id}','entree')" title="Entrée stock">📥</div><div class="ab" onclick="mvtStock('${p.id}','sortie')" title="Sortie stock">📤</div></div></div>`)
+          .join('')
+      : '<div style="grid-column:span 3"><div class="empty"><div class="empty-ico">📦</div><div class="empty-t">Aucun produit</div><button class="btn btn-primary" onclick="openModal(\'moProd\')">+ Ajouter</button></div></div>';
+  } catch(e) { toast('Erreur stock', 'error'); }
+}
+
+async function createProduit() {
+  const des = v('p_des');
+  if (!des) { toast('Désignation obligatoire', 'error'); return; }
+  try {
+    await sb('produits', {method:'POST', body:{designation:des, reference:v('p_ref'), unite:document.getElementById('p_un').value, prix_vente:parseFloat(v('p_pv')||0), prix_achat:parseFloat(v('p_pa')||0), tva:parseFloat(v('p_tva')||19), stock_actuel:parseInt(v('p_st')||0), stock_min:parseInt(v('p_sm')||5), stock_max:50, actif:true}});
+    toast('Produit créé ✅', 'success'); closeModal('moProd'); loadStock();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+async function mvtStock(id, type) {
+  const q = prompt(type==='entree' ? 'Quantité à ajouter :' : 'Quantité à retirer :');
+  if (!q || isNaN(q)) return;
+  try {
+    const p = (await sb(`produits?id=eq.${id}&select=stock_actuel`))[0];
+    const avant = p.stock_actuel;
+    const apres = type==='entree' ? avant+parseFloat(q) : Math.max(0, avant-parseFloat(q));
+    await sb(`produits?id=eq.${id}`, {method:'PATCH', prefer:'return=minimal', body:{stock_actuel:apres}});
+    await sb('mouvements_stock', {method:'POST', body:{produit_id:id, type, quantite:parseFloat(q), stock_avant:avant, stock_apres:apres}});
+    toast(`Stock: ${avant} → ${apres}`, 'success'); loadStock();
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function exportStockExcel() {
+  const d = await sb('produits?actif=eq.true&order=designation');
+  dlXLSX(d.map(p=>({'Référence':p.reference||'','Désignation':p.designation,'Unité':p.unite,'Prix vente HT':p.prix_vente,'Stock actuel':p.stock_actuel,'Stock min':p.stock_min})), 'Stock_NexaFlow');
+  toast('Excel téléchargé ✅', 'success');
+}
+
+// ══════════════════════════════════════════
+// TRÉSORERIE & PAIEMENTS
+// ══════════════════════════════════════════
+async function loadTreso() {
+  try {
+    const d = await sb('tresorerie?order=date_mouvement.desc&limit=100');
+    const ent = d.filter(t=>t.type==='entree').reduce((s,t)=>s+t.montant, 0);
+    const sor = d.filter(t=>t.type==='sortie').reduce((s,t)=>s+t.montant, 0);
+    document.getElementById('tSolde').textContent = fmt(ent-sor);
+    document.getElementById('tEnt').textContent   = fmt(ent);
+    document.getElementById('tSor').textContent   = fmt(sor);
+    document.getElementById('tresoTbl').innerHTML  = d.map(t=>`<tr><td>${fmtD(t.date_mouvement)}</td><td>${t.description||'—'}</td><td style="color:var(--t2);font-size:12px">${t.reference||'—'}</td><td><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:${t.type==='entree'?'var(--green-d)':'var(--red-d)'};color:${t.type==='entree'?'var(--green)':'var(--red)'}">${t.type==='entree'?'Entrée':'Sortie'}</span></td><td style="font-weight:700;color:${t.type==='entree'?'var(--green)':'var(--red)'}">${t.type==='entree'?'+':'-'}${fmt(t.montant)}</td></tr>`).join('');
+  } catch(e) { toast('Erreur trésorerie', 'error'); }
+}
+
+async function exportTresoExcel() {
+  const d = await sb('tresorerie?order=date_mouvement.desc');
+  dlXLSX(d.map(t=>({'Date':fmtD(t.date_mouvement),'Type':t.type,'Description':t.description||'','Montant':t.montant})), 'Tresorerie_NexaFlow');
+  toast('Excel téléchargé ✅', 'success');
+}
+
+async function loadPaiements() {
+  try {
+    const d = await sb('paiements?select=*,factures(numero,clients(raison_sociale))&order=date_paiement.desc&limit=50');
+    const total = d.reduce((s,p)=>s+p.montant, 0);
+    document.getElementById('payTotal').textContent  = fmt(total);
+    document.getElementById('payCount').textContent  = d.length;
+    document.getElementById('payAttente').textContent = '—';
+    document.getElementById('payTbl').innerHTML = d.map(p=>`<tr><td>${fmtD(p.date_paiement)}</td><td><div style="font-weight:600">${p.factures?.clients?.raison_sociale||'—'}</div><div style="font-size:11px;color:var(--t2)">${p.factures?.numero||''}</div></td><td>${p.mode||'—'}</td><td style="color:var(--t2);font-size:12px">${p.reference||'—'}</td><td style="font-weight:700;color:var(--green)">${fmt(p.montant)}</td><td></td></tr>`).join('');
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+// MODÈLES DE FACTURES — DIFFÉRENCIÉS
+// ══════════════════════════════════════════
+const MODELES = {
+  education: {
+    nom:   'Éducation / Formation',
+    icon:  '🎓',
+    color: '#0F4C75',
+    titre: 'FACTURE',
+    desc:  'Pour les enseignants, formateurs, instituts de formation',
+    tags:  ['Cours','Session','Heures'],
+    cols: [
+      {label:'Type de prestation',   key:'designation',    type:'text'},
+      {label:'Session / Détails',    key:'session',        type:'text'},
+      {label:'Quantité',             key:'quantite',       type:'number'},
+      {label:'Unité',                key:'unite',          type:'text', default:'H'},
+      {label:'Prix unitaire HT (DA)',key:'prix_unitaire',  type:'number'},
+      {label:'Total TTC',            key:'total',          type:'formula'},
+    ],
+    tva: false, lettres: true, sig: true, banque: true,
+    mentions: 'Montant exprimé en dinars algériens, non assujetti à la TVA.',
+    exemple: 'Cours Français général · Session Mars 2026 · 28H × 1500 DA = 42 000 DA'
+  },
+  freelance: {
+    nom:   'Auto-entrepreneur / Freelance',
+    icon:  '👤',
+    color: '#1A3A6B',
+    titre: "NOTE D'HONORAIRES",
+    desc:  'Pour les indépendants, consultants, auto-entrepreneurs',
+    tags:  ['Honoraires','Consultation','Freelance'],
+    cols: [
+      {label:'Nature de la prestation', key:'designation',   type:'text'},
+      {label:'Période / Date',          key:'periode',       type:'text'},
+      {label:'Heures / Jours',          key:'quantite',      type:'number'},
+      {label:'Unité',                   key:'unite',         type:'text', default:'H'},
+      {label:'Tarif unitaire (DA)',      key:'prix_unitaire', type:'number'},
+      {label:'Montant (DA)',             key:'total',         type:'formula'},
+    ],
+    tva: false, lettres: true, sig: true, banque: true,
+    mentions: "Exonéré de TVA selon l'Article 9 du Code des Taxes sur le Chiffre d'Affaires.",
+    exemple: 'Développement web · Mars 2026 · 20H × 3500 DA = 70 000 DA'
+  },
+  commerce: {
+    nom:   'Commerce / Négoce',
+    icon:  '🏪',
+    color: '#1B4332',
+    titre: 'FACTURE',
+    desc:  'Pour les commerçants, distributeurs, import/export',
+    tags:  ['Produits','TVA 19%','Référence'],
+    cols: [
+      {label:'Référence',         key:'reference',     type:'text'},
+      {label:'Désignation',       key:'designation',   type:'text'},
+      {label:'Quantité',          key:'quantite',      type:'number'},
+      {label:'Unité',             key:'unite',         type:'text', default:'U'},
+      {label:'Prix HT (DA)',      key:'prix_unitaire', type:'number'},
+      {label:'TVA %',             key:'tva_pct',       type:'text', default:'19%'},
+      {label:'Total TTC (DA)',    key:'total',         type:'formula'},
+    ],
+    tva: true, lettres: true, sig: false, banque: true,
+    mentions: '',
+    exemple: 'Switch Cisco 24P · Réf NET-024 · 2U × 45 000 DA HT + TVA 19%'
+  },
+  service: {
+    nom:   'Prestation de Service',
+    icon:  '⚙️',
+    color: '#6B21A8',
+    titre: 'FACTURE',
+    desc:  'Pour les techniciens, IT, maintenance, BTP',
+    tags:  ['Intervention','Taux horaire','Lieu'],
+    cols: [
+      {label:"Nature de l'intervention", key:'designation',   type:'text'},
+      {label:'Lieu / Site',               key:'lieu',          type:'text'},
+      {label:'Durée',                     key:'duree',         type:'number'},
+      {label:'Unité',                     key:'unite',         type:'text', default:'H'},
+      {label:'Taux horaire (DA)',          key:'prix_unitaire', type:'number'},
+      {label:'Montant HT (DA)',            key:'total',         type:'formula'},
+    ],
+    tva: true, lettres: true, sig: true, banque: true,
+    mentions: '',
+    exemple: 'Installation réseau LAN · Siège Oran · 8H × 4 500 DA = 36 000 DA'
+  },
+};
+
+function loadModeles() {
+  const grid = document.getElementById('modelesGrid');
+  if (!grid) return;
+  grid.innerHTML = Object.entries(MODELES).map(([id, m]) => `
+    <div class="mcard">
+      <div class="mcard-preview" style="background:${m.color}18">
+        <div style="font-size:36px">${m.icon}</div>
+        <div style="position:absolute;top:8px;right:8px;background:${m.color};color:#fff;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${m.titre}</div>
+      </div>
+      <div class="mcard-body">
+        <div class="mcard-name">${m.nom}</div>
+        <div class="mcard-desc">${m.desc}</div>
+        <div class="mcard-cols">
+          ${m.cols.map(c=>`<div class="mcard-col">${c.label}</div>`).join('')}
+        </div>
+        <div style="background:var(--s2);border-radius:6px;padding:8px;font-size:11px;color:var(--t3);margin-bottom:10px;font-style:italic">${m.exemple}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          ${m.tags.map(t=>`<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${m.color}20;color:${m.color}">${t}</span>`).join('')}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-primary btn-xs" style="flex:1" onclick="testModeleExcel('${id}')">📊 Tester Excel</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function testModeleExcel(modeleId) {
+  toast(`Test du modèle "${MODELES[modeleId]?.nom}" — utilisez 📊 sur une vraie facture`, 'info');
+}
+
+async function exportAvecModele(facId) {
+  document.getElementById('modeleChoiceList').innerHTML = Object.entries(MODELES).map(([id,m]) => `
+    <div class="qopt" onclick="closeModal('moUseFac');dlFacExcelModele('${facId}','${id}')">
+      <div class="qico" style="background:${m.color}20;font-size:20px">${m.icon}</div>
+      <div>
+        <div style="font-weight:700">${m.nom}</div>
+        <div style="font-size:12px;color:var(--t2)">${m.cols.map(c=>c.label).join(' · ')}</div>
+      </div>
+    </div>`).join('');
+  openModal('moUseFac');
+}
+
+async function dlFacExcelModele(facId, modeleId) {
+  if (HF_BACKEND) {
+    try {
+      toast('Génération Excel professionnel…', 'info');
+      const url = HF_BACKEND + '/factures/' + facId + '/excel?modele=' + modeleId;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(await res.text());
+      const blob  = await res.blob();
+      const cd    = res.headers.get('Content-Disposition') || '';
+      const fname = cd.match(/filename=(.+)/)?.[1] || `${facId}_${modeleId}.xlsx`;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = fname; a.click();
+      toast('Excel professionnel téléchargé ✅', 'success');
+      return;
+    } catch(e) { toast('Backend: ' + e.message, 'info'); }
+  }
+  // Fallback basique
+  try {
+    toast('Export Excel basique…', 'info');
+    const [fac, lignes] = await Promise.all([
+      sb('factures?id=eq.'+facId+'&select=*,clients(*)').then(d=>d[0]),
+      sb('lignes_facture?facture_id=eq.'+facId+'&order=ordre')
+    ]);
+    const m = MODELES[modeleId] || MODELES.education;
+    const rows = lignes.map(l => {
+      const row = {};
+      m.cols.forEach(col => {
+        if (col.type==='formula') row[col.label] = (l.quantite||0)*(l.prix_unitaire||0);
+        else row[col.label] = l[col.key] || l.designation || '';
+      });
+      return row;
+    });
+    rows.push({}); rows.push({[m.cols[0].label]: 'TOTAL TTC', [m.cols[m.cols.length-1].label]: fac.montant_ttc});
+    dlXLSX(rows, (fac.numero||facId).replace(/\//g,'-') + '_' + modeleId);
+    toast('Excel téléchargé ✅', 'success');
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════
+// EXPORTS
+// ══════════════════════════════════════════
+function dlXLSX(rows, filename) {
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Données');
+  ws['!cols'] = Object.keys(rows[0]||{}).map(k => ({wch: Math.max(k.length, 14)}));
+  XLSX.writeFile(wb, filename + '.xlsx');
+}
+
+async function exportFacturesExcel() {
+  try {
+    const d = await sb('factures?select=*,clients(raison_sociale)&order=date_facture.desc');
+    dlXLSX(d.map(f=>({'N° Facture':f.numero,'Client':f.clients?.raison_sociale||'—','Date':fmtD(f.date_facture),'Échéance':fmtD(f.date_echeance),'Objet':f.objet||'','Montant HT':f.montant_ht,'TVA':f.montant_tva,'Total TTC':f.montant_ttc,'Statut':f.statut})), 'Factures_NexaFlow');
+    toast('Excel téléchargé ✅', 'success');
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+// ══════════════════════════════════════════
+// PDF
+// ══════════════════════════════════════════
+function safe(s) { return String(s||'').replace(/[^\x00-\xFF]/g,'').trim(); }
+function pdfNum(n) { return String(Math.round(Number(n)||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' ') + ' DA'; }
+function pdfDate(d) { if(!d)return'--'; try{const dt=new Date(d); return String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0')+'/'+dt.getFullYear();}catch{return String(d).substring(0,10);} }
+
+async function dlPDF(id) {
+  toast('Génération PDF…', 'info');
+  try {
+    const [fac, lignes] = await Promise.all([sb(`factures?id=eq.${id}&select=*,clients(*)`).then(d=>d[0]), sb(`lignes_facture?facture_id=eq.${id}&order=ordre`)]);
+    genPDF(fac, lignes, getEnt());
+    toast('PDF téléchargé ✅', 'success');
+  } catch(e) { toast('Erreur PDF: '+e.message, 'error'); }
+}
+
+async function dlDevPDF(id) {
+  toast('Génération PDF…', 'info');
+  try {
+    const [dev, lignes] = await Promise.all([sb(`devis?id=eq.${id}&select=*,clients(*)`).then(d=>d[0]), sb(`lignes_devis?devis_id=eq.${id}&order=ordre`)]);
+    genPDF({...dev, type:'devis'}, lignes, getEnt());
+    toast('PDF téléchargé ✅', 'success');
+  } catch(e) { toast('Erreur PDF', 'error'); }
+}
+
+async function dlClientPDF(id) {
+  try {
+    const c    = (await sb(`clients?id=eq.${id}`))[0];
+    const facs = await sb(`factures?client_id=eq.${id}&order=date_facture.desc&limit=10`);
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF(); const BL=[79,110,247];
+    doc.setFillColor(...BL); doc.rect(0,0,210,28,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text('FICHE CLIENT',14,12);
+    doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.text(safe(c.raison_sociale),14,21);
+    doc.setTextColor(0,0,0); let y=38;
+    [['RC',c.rc],['NIF',c.nif],['Contact',c.nom_contact],['Téléphone',c.telephone],['Email',c.email],['Ville',c.ville],['Statut',c.statut]].forEach(([k,v2])=>{
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(100,116,139); doc.text(k,14,y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(30,41,59); doc.text(safe(v2||'—'),80,y); y+=7;
+    });
+    y+=5; doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(0,0,0); doc.text('Historique des factures',14,y); y+=7;
+    facs.forEach(f=>{ doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139); doc.text(`${f.numero}  ${pdfDate(f.date_facture)}`,14,y); doc.setTextColor(30,41,59); doc.text(pdfNum(f.montant_ttc),130,y); doc.text(f.statut,160,y); y+=6; });
+    doc.save(`client_${safe(c.raison_sociale).replace(/\s+/g,'_')}.pdf`);
+    toast('PDF téléchargé ✅', 'success');
+  } catch(e) { toast('Erreur PDF', 'error'); }
+}
+
+function genPDF(fac, lignes, ent) {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF('p','mm','a4');
+  const W = 210;
+  const BL=[79,110,247], MU=[100,116,139], DK=[30,41,59], LT=[248,250,252];
+  const cli = fac.clients || {};
+  const titre = fac.type==='devis' ? 'DEVIS' : 'FACTURE';
+
+  doc.setFillColor(...BL); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
+  doc.setFontSize(26); doc.text(titre, W-14, 20, {align:'right'});
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.text(safe(ent.raison_sociale||'Mon Entreprise'), 14, 13);
+  doc.setFontSize(9); doc.text('N  ' + safe(fac.numero), 14, 22);
+
+  let y = 38;
+  doc.setFillColor(...LT); doc.rect(14, y-3, 85, 30, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...MU); doc.text('DETAILS', 16, y+2);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...DK);
+  doc.text('Date      : ' + pdfDate(fac.date_facture||fac.date_devis), 16, y+9);
+  doc.text('Echeance  : ' + pdfDate(fac.date_echeance||fac.date_validite), 16, y+16);
+  doc.text('Statut    : ' + (fac.statut||'--'), 16, y+23);
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...MU); doc.text('EMETTEUR', 108, y+2);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...DK);
+  doc.text(safe(ent.raison_sociale||''), 108, y+9);
+  doc.setFontSize(8); doc.setTextColor(...MU);
+  if (ent.adresse) doc.text(safe(ent.adresse).substring(0,38), 108, y+15);
+  doc.text('RC: '+safe(ent.rc||'--')+'   NIF: '+safe(ent.nif||'--'), 108, y+21);
+  doc.text('Tel: '+safe(ent.telephone||'--'), 108, y+27);
+
+  y += 36;
+  doc.setFillColor(235,243,255); doc.rect(14, y-3, W-28, 26, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...MU); doc.text('DESTINATAIRE', 16, y+2);
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...DK);
+  doc.text(safe(cli.raison_sociale||'--'), 16, y+9);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...MU);
+  if (cli.adresse) doc.text(safe(cli.adresse).substring(0,60), 16, y+15);
+  doc.text('RC: '+safe(cli.rc||'--')+'   NIF: '+safe(cli.nif||'--')+'   Tel: '+safe(cli.telephone||'--'), 16, y+21);
+
+  y += 32;
+  if (fac.objet) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...MU); doc.text('Objet :', 14, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...DK); doc.text(safe(fac.objet).substring(0,80), 36, y); y += 8;
+  }
+
+  const CW = [88, 14, 30, 14, 30];
+  const CX = [14, 14+CW[0], 14+CW[0]+CW[1], 14+CW[0]+CW[1]+CW[2], 14+CW[0]+CW[1]+CW[2]+CW[3]];
+  doc.setFillColor(...BL); doc.rect(14, y, W-28, 9, 'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+  ['DESIGNATION','QTE','PU HT (DA)','TVA','TOTAL HT'].forEach((h,i) => doc.text(h, CX[i]+2, y+6));
+  y += 9;
+
+  lignes.forEach((l, idx) => {
+    const rH = 8;
+    idx%2===0 ? doc.setFillColor(255,255,255) : doc.setFillColor(...LT);
+    doc.rect(14, y, W-28, rH, 'F');
+    doc.setDrawColor(226,232,240); doc.setLineWidth(0.2); doc.rect(14, y, W-28, rH, 'S');
+    doc.setTextColor(...DK); doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.text(safe(l.designation||'').substring(0,48), CX[0]+2, y+5.5);
+    doc.text(String(Math.round((l.quantite||1)*100)/100), CX[1]+2, y+5.5);
+    doc.text(String(Math.round((l.prix_unitaire||0)*100)/100).replace(/\B(?=(\d{3})+(?!\d))/g,' '), CX[2]+2, y+5.5);
+    doc.text(String(l.tva||19)+'%', CX[3]+2, y+5.5);
+    doc.setFont('helvetica','bold');
+    doc.text(String(Math.round((l.montant_ht||0)*100)/100).replace(/\B(?=(\d{3})+(?!\d))/g,' '), CX[4]+2, y+5.5);
+    y += rH;
+  });
+
+  y += 5;
+  [['Sous-total HT', fac.montant_ht], ['TVA 19%', fac.montant_tva]].forEach(([lbl, val]) => {
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...MU); doc.text(lbl, 132, y);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...DK); doc.text(pdfNum(val), W-14, y, {align:'right'}); y += 7;
+  });
+  doc.setFillColor(...BL); doc.rect(125, y-3, W-14-125, 11, 'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text('TOTAL TTC', 128, y+5); doc.text(pdfNum(fac.montant_ttc), W-14, y+5, {align:'right'});
+  y += 18;
+
+  if (fac.notes && y < 270) {
+    doc.setDrawColor(226,232,240); doc.line(14, y, W-14, y); y += 5;
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...MU); doc.text('Notes', 14, y); y += 5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...DK);
+    doc.splitTextToSize(safe(fac.notes).substring(0,300), W-28).forEach(line => { doc.text(line, 14, y); y += 5; });
+  }
+
+  doc.setDrawColor(226,232,240); doc.line(14, 284, W-14, 284);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...MU);
+  doc.text(safe(ent.raison_sociale||'') + ' | RC: '+safe(ent.rc||'--')+' | NIF: '+safe(ent.nif||'--'), W/2, 289, {align:'center'});
+  doc.text('Document généré par NexaFlow', W/2, 293, {align:'center'});
+  doc.save(safe(fac.numero||'document') + '.pdf');
+}
+
+// ══════════════════════════════════════════
+// RECHERCHE GLOBALE
+// ══════════════════════════════════════════
+let srchTimer = null;
+async function globalSearch(q) {
+  const drop = document.getElementById('srchDrop');
+  if (!q || q.length < 2) { drop.classList.remove('open'); return; }
+  clearTimeout(srchTimer);
+  srchTimer = setTimeout(async () => {
+    try {
+      const [cls, facs] = await Promise.all([
+        sb(`clients?raison_sociale=ilike.*${encodeURIComponent(q)}*&select=id,raison_sociale,ville&limit=4`),
+        sb(`factures?numero=ilike.*${encodeURIComponent(q)}*&select=id,numero,montant_ttc,statut&limit=4`)
+      ]);
+      const items = [
+        ...cls.map(c=>`<div class="sr-item" onclick="closeSearch();viewClient('${c.id}')"><div class="sr-ico" style="background:var(--blue-d)">👤</div><div><div style="font-size:13px;font-weight:500">${c.raison_sociale}</div><div style="font-size:11px;color:var(--t2)">${c.ville||'Client'}</div></div></div>`),
+        ...facs.map(f=>`<div class="sr-item" onclick="closeSearch();viewFacture('${f.id}')"><div class="sr-ico" style="background:var(--amber-d)">🧾</div><div><div style="font-size:13px;font-weight:500">${f.numero}</div><div style="font-size:11px;color:var(--t2)">${fmt(f.montant_ttc)} · ${stBadge(f.statut)}</div></div></div>`)
+      ];
+      drop.innerHTML = items.length ? items.join('') : '<div style="padding:14px;text-align:center;color:var(--t3);font-size:13px">Aucun résultat</div>';
+      drop.classList.add('open');
+    } catch(e) {}
+  }, 300);
+}
+function closeSearch() { document.getElementById('srchDrop').classList.remove('open'); document.getElementById('srchInput').value = ''; }
+document.addEventListener('click', e => { if (!document.getElementById('srchBox')?.contains(e.target)) closeSearch(); });
+
+// ══════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════
+function settingTab(el, panelId) {
+  document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  ['ssEnt','ssBanque','ssNotif','ssPlan'].forEach(id => {
+    const p = document.getElementById(id);
+    if (p) p.style.display = id===panelId ? 'block' : 'none';
+  });
+  if (panelId === 'ssEnt')    { loadEntreprise(); }
+  if (panelId === 'ssBanque') { loadBanque(); }
+  if (panelId === 'ssPlan')   { updatePlanUI(); }
+}
+
+// ══════════════════════════════════════════
+// USER MENU
+// ══════════════════════════════════════════
+function toggleUserMenu() {
+  const ex = document.getElementById('userMenuPop');
+  if (ex) { ex.remove(); return; }
+  const m = document.createElement('div');
+  m.id = 'userMenuPop';
+  m.style.cssText = 'position:fixed;bottom:65px;left:14px;width:232px;background:var(--s1);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:9999;padding:6px';
+  m.innerHTML = `
+    <div style="padding:10px 12px;font-size:12px;color:var(--t3);border-bottom:1px solid var(--border);margin-bottom:4px">
+      ${currentUser?.email||'—'}<br>
+      <span style="color:${USER_PLAN==='pro'?'var(--blue)':'var(--t3)'}">Plan: ${USER_PLAN==='pro'?'⭐ Pro':'Gratuit'}</span>
+    </div>
+    <div onclick="openModal('moUpgrade');document.getElementById('userMenuPop')?.remove()" style="padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">💎 Plans & Tarifs</div>
+    <div onclick="goPage('parametres',null);document.getElementById('userMenuPop')?.remove()" style="padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">⚙️ Paramètres</div>
+    <div style="height:1px;background:var(--border);margin:4px 0"></div>
+    <div onclick="logout()" style="padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--red)" onmouseover="this.style.background='var(--red-d)'" onmouseout="this.style.background=''">🚪 Se déconnecter</div>`;
+  document.body.appendChild(m);
+  setTimeout(() => {
+    document.addEventListener('click', function h(e) {
+      if (!m.contains(e.target) && !document.querySelector('.suser')?.contains(e.target)) { m.remove(); document.removeEventListener('click',h); }
+    });
+  }, 100);
+}
+
+function openNotifs() { toast('Aucune notification', 'info'); }
+
+// ══════════════════════════════════════════
+// NAV & MODALS
+// ══════════════════════════════════════════
+const pgNames = {dashboard:'Tableau de bord',clients:'Clients',factures:'Facturation',devis:'Devis',stock:'Produits & Stock',paiements:'Paiements',tresorerie:'Trésorerie',modeles:'Documents & Modèles',parametres:'Paramètres'};
+const pgLoaders = {
+  clients:     loadClients,
+  factures:    loadFactures,
+  devis:       loadDevis,
+  stock:       loadStock,
+  tresorerie:  loadTreso,
+  paiements:   loadPaiements,
+  modeles:     loadModeles,
+  parametres:  () => { loadEntreprise(); loadBanque(); updatePlanUI(); },
+  dashboard:   loadDash,
+};
+
+function goPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sni').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-'+id);
+  if (pg) pg.classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('breadcrumb').textContent = pgNames[id] || id;
+  if (pgLoaders[id]) pgLoaders[id]();
+  if (['factures','devis'].includes(id)) fillCliSel(['f_cli','d_cli']);
+}
+
+function toggleG(el) { el.classList.toggle('open'); el.nextElementSibling?.classList.toggle('open'); }
+
+function openModal(id) {
+  document.getElementById(id)?.classList.add('open');
+  if (['moFac','moNew'].includes(id)) fillCliSel(['f_cli']);
+  if (id === 'moDev') fillCliSel(['d_cli']);
+  if (id === 'moUpgrade') updateCCPDisplay();
+}
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+function trackPub(name) {
+  const urls = {mobilis:'https://mobilis.dz', djezzy:'https://djezzy.dz', aat:'https://aat.dz'};
+  if (urls[name]) window.open(urls[name], '_blank');
+}
+
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type==='success'?'✅':type==='error'?'❌':'ℹ️') + ' ' + msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>
