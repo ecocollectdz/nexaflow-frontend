@@ -1379,5 +1379,179 @@ window.addEventListener('load', () => {
 });
 </script>
 
+
+<!-- ══════════════════════════════════════
+  MODAL : IMPORTER RAPPORT EXCEL
+══════════════════════════════════════ -->
+<div class="mo" id="moImportRapport">
+  <div class="md" style="max-width:520px">
+    <div class="mh">
+      <div class="mt">📥 Rapport Excel → Facture Professionnelle</div>
+      <div class="mc" onclick="closeModal('moImportRapport')">✕</div>
+    </div>
+    <div class="mb">
+      <div style="background:var(--blue-d);border:1px solid rgba(79,142,247,.2);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--t2)">
+        <div style="font-weight:700;color:var(--blue);margin-bottom:6px">💡 Comment ça marche ?</div>
+        1. Téléchargez le rapport Excel mensuel de votre client (Institut Français, etc.)<br>
+        2. Choisissez votre modèle de facture<br>
+        3. Cliquez "Convertir" → la facture pro est générée automatiquement ✅
+      </div>
+
+      <!-- Upload fichier -->
+      <div style="border:2px dashed var(--border2);border-radius:10px;padding:24px;text-align:center;cursor:pointer;margin-bottom:16px;transition:border-color .2s" onclick="document.getElementById('rapportFile').click()" id="dropZone" ondragover="event.preventDefault();this.style.borderColor='var(--blue)'" ondrop="handleDrop(event)">
+        <div style="font-size:32px;margin-bottom:8px">📄</div>
+        <div style="font-weight:600;margin-bottom:4px" id="dropZoneText">Cliquez pour choisir le fichier rapport</div>
+        <div style="font-size:12px;color:var(--t3)">Fichiers acceptés : .xlsx, .xls</div>
+        <input type="file" id="rapportFile" accept=".xlsx,.xls" style="display:none" onchange="onRapportFile(this)">
+      </div>
+
+      <!-- Modèle -->
+      <div class="fm" style="margin-bottom:14px">
+        <label>Modèle de facture</label>
+        <select id="rapportModele">
+          <option value="formateur">🎓 Formateur / Institut Français</option>
+          <option value="education">📚 Éducation / Formation</option>
+          <option value="freelance">👤 Auto-entrepreneur / Freelance</option>
+          <option value="commerce">🏪 Commerce / Négoce</option>
+          <option value="service">⚙️ Prestation de Service</option>
+        </select>
+      </div>
+
+      <!-- Infos optionnelles -->
+      <div style="background:var(--s2);border-radius:8px;padding:12px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px">📋 Infos facture (optionnel — sinon utilise vos paramètres)</div>
+        <div class="fg">
+          <div class="fm"><label>N° Facture</label><input type="text" id="rp_numero" placeholder="2026/MAI/N°ANAE/ANN/ELS"></div>
+          <div class="fm"><label>Référent local</label><input type="text" id="rp_referent" placeholder="Mohammed CHAABANE"></div>
+          <div class="fm s2"><label>Objet</label><input type="text" id="rp_objet" placeholder="Cours et prestations — Mai 2026"></div>
+          <div class="fm"><label>Nom client</label><input type="text" id="rp_client_nom" placeholder="Institut Français d'Algérie Oran"></div>
+          <div class="fm"><label>NIF client</label><input type="text" id="rp_client_nif"></div>
+        </div>
+      </div>
+
+      <div id="rapportStatus" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-ghost" onclick="closeModal('moImportRapport')">Annuler</button>
+      <button class="btn btn-primary" onclick="convertirRapport()" id="convertBtn">
+        ⚡ Convertir en facture pro
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// IMPORT RAPPORT EXCEL → FACTURE
+// ══════════════════════════════════════════
+let rapportFile = null;
+
+function onRapportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  rapportFile = file;
+  document.getElementById('dropZoneText').textContent = `✅ ${file.name} sélectionné`;
+  document.getElementById('dropZone').style.borderColor = 'var(--green)';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+    rapportFile = file;
+    document.getElementById('dropZoneText').textContent = `✅ ${file.name} sélectionné`;
+    document.getElementById('dropZone').style.borderColor = 'var(--green)';
+  } else {
+    toast('Format invalide — utilisez .xlsx ou .xls', 'error');
+  }
+}
+
+async function convertirRapport() {
+  if (!rapportFile) { toast('Choisissez un fichier rapport', 'error'); return; }
+
+  const btn    = document.getElementById('convertBtn');
+  const status = document.getElementById('rapportStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ Conversion en cours…';
+  status.style.display = 'block';
+  status.style.background = 'var(--blue-d)';
+  status.style.color = 'var(--blue)';
+  status.textContent = '📄 Lecture du rapport et génération de la facture…';
+
+  try {
+    const ent = getEnt ? getEnt() : {};
+    const infoJson = JSON.stringify({
+      entreprise: {
+        raison_sociale: ent.raison_sociale || '',
+        activite:       ent.activite || '',
+        adresse:        ent.adresse || '',
+        rc:             ent.rc || '',
+        nif:            ent.nif || '',
+        telephone:      ent.telephone || '',
+        email:          ent.email || '',
+        nom_contact:    ent.nom_contact || '',
+        banque: ent.banque || {}
+      },
+      client: {
+        raison_sociale: document.getElementById('rp_client_nom').value || "Institut Français d'Algérie Oran",
+        nif: document.getElementById('rp_client_nif').value || '',
+      },
+      facture: {
+        numero:   document.getElementById('rp_numero').value || '',
+        referent: document.getElementById('rp_referent').value || '',
+        objet:    document.getElementById('rp_objet').value || '',
+        modalite: 'Huit jours (08 J)',
+      }
+    });
+
+    const formData = new FormData();
+    formData.append('fichier',   rapportFile);
+    formData.append('modele',    document.getElementById('rapportModele').value);
+    formData.append('info_json', infoJson);
+
+    const backend = (typeof HF_BACKEND !== 'undefined' ? HF_BACKEND : (typeof CFG !== 'undefined' ? CFG.backend : '')) || '';
+    if (!backend) throw new Error('Backend non configuré');
+
+    const res = await fetch(backend.replace(/\/$/,'') + '/rapports/convertir', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      const errTxt = await res.text();
+      throw new Error(errTxt);
+    }
+
+    const blob  = await res.blob();
+    const cd    = res.headers.get('Content-Disposition') || '';
+    const fname = cd.match(/filename=(.+)/)?.[1] || `FACTURE_${rapportFile.name}`;
+    const a     = document.createElement('a');
+    a.href      = URL.createObjectURL(blob);
+    a.download  = fname;
+    a.click();
+
+    status.style.background = 'var(--green-d)';
+    status.style.color      = 'var(--green)';
+    status.textContent      = `✅ Facture générée et téléchargée : ${fname}`;
+    toast('Facture professionnelle générée ✅', 'success');
+
+    // Reset
+    rapportFile = null;
+    document.getElementById('rapportFile').value = '';
+    document.getElementById('dropZoneText').textContent = 'Cliquez pour choisir le fichier rapport';
+    document.getElementById('dropZone').style.borderColor = 'var(--border2)';
+
+  } catch(e) {
+    status.style.background = 'var(--red-d)';
+    status.style.color      = 'var(--red)';
+    status.textContent      = '❌ Erreur: ' + e.message;
+    toast('Erreur conversion: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Convertir en facture pro';
+  }
+}
+</script>
+
 </body>
 </html>
